@@ -182,7 +182,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         {/* <TeamSwitcher teams={data.teams} /> */}
-        <SystemLogo isCollapsed={false} />
+        <SystemLogo />
       </SidebarHeader>
       <SidebarContent>
         <NavAddConversation

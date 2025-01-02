@@ -193,28 +193,16 @@ export function NavAddConversation({
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Collapsible
-              key={"asdasdasds"}
-              asChild
-              defaultOpen={true}
-              className="group/collapsible"
+            {/* 🌟 添加会话 */}
+            <SidebarMenuButton
+              tooltip="New Conversation"
+              onClick={onAddConversation}
+              className={styles.addBtn}
+              variant="default"
             >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  {/* 🌟 添加会话 */}
-                  <SidebarMenuButton
-                    tooltip="New Conversation"
-                    onClick={onAddConversation}
-                    className={styles.addBtn}
-                    variant="default"
-                  >
-                    <PlusOutlined />
-                    <span>New Conversation</span>
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent></CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+              <PlusOutlined />
+              <span>New Conversation</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>

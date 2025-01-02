@@ -186,35 +186,20 @@ export function NavConversations({
     setAttachedFiles(info.fileList);
 
   return (
-    <div>
-      <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-        <SidebarGroupLabel>Conversations</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Collapsible
-              key={"asdasdasd"}
-              asChild
-              defaultOpen={true}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <Conversations
-                    items={conversationsItems}
-                    className={styles.conversations}
-                    activeKey={activeKey}
-                    onActiveChange={onConversationClick}
-                  />
-                </CollapsibleTrigger>
-                {/* <CollapsibleContent>
-                  <SidebarMenuSub>
-                  </SidebarMenuSub>
-                </CollapsibleContent> */}
-              </SidebarMenuItem>
-            </Collapsible>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-    </div>
+    // <div>
+    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+      <SidebarGroupLabel>Conversations</SidebarGroupLabel>
+      {/* <SidebarMenu>
+        <SidebarMenuItem> */}
+      <Conversations
+        items={conversationsItems}
+        className={styles.conversations}
+        activeKey={activeKey}
+        onActiveChange={onConversationClick}
+      />
+      {/* </SidebarMenuItem>
+      </SidebarMenu> */}
+    </SidebarGroup>
+    // </div>
   );
 }

@@ -267,7 +267,7 @@ const SidebarTrigger = React.forwardRef<
 
   return (
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger asChild>
         <Button
           ref={ref}
           data-sidebar="trigger"
