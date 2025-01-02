@@ -15,7 +15,7 @@ export default function Home() {
           <p className="text-muted-foreground">Enter your message, and I&apos;ll generate the diagram you need.</p>  
         </div>
         <div className="relative flex flex-col gap-4 mt-10">
-          <div className="flex w-full absolute top-[40px] right-0 left-0">
+          <div className={`flex w-full ${showUpgrade ? "absolute top-[40px] right-0 left-0" : ""}`}>
             <Sender 
               style={{ 
                 backgroundColor: 'white',
