@@ -24,8 +24,6 @@ import {
   SmileOutlined,
 } from "@ant-design/icons";
 import { Badge, Button, type GetProp, Space } from "antd";
-import { useParams } from "next/navigation";
-import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useChatContext } from "../layout";
 import { Sparkles } from "lucide-react";
 
@@ -352,8 +350,8 @@ const Independent: React.FC = () => {
     try {
       setIsLoading(true);
       const openai = new OpenAI({
-        baseURL: process.env.OPENAI_API_BASE_URL,
-        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: process.env.NEXT_PUBLIC_OPENAI_API_BASE_URL,
+        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
         dangerouslyAllowBrowser: true,
       });
 
@@ -403,9 +401,12 @@ const Independent: React.FC = () => {
   // 第二步：生成 Mermaid DSL
   const generateMermaidCode = async (description: string) => {
     try {
+      console.log(process.env.NEXT_PUBLIC_OPENAI_API_BASE_URL);
+      console.log(process.env.NEXT_PUBLIC_OPENAI_API_KEY);
+      debugger;
       const openai = new OpenAI({
-        baseURL: process.env.OPENAI_API_BASE_URL,
-        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: process.env.NEXT_PUBLIC_OPENAI_API_BASE_URL,
+        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
         dangerouslyAllowBrowser: true,
       });
 
