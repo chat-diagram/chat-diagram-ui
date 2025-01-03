@@ -359,11 +359,13 @@ const Independent: React.FC = () => {
         messages: [
           {
             role: "system",
-            content: `作为一个流程图专家，请帮我优化和详细化以下流程描述，使其更加清晰和完整：
-                    要求: "你的回答要符合例子中的要求，并且要符合例子中的格式，要简洁，不要超过400字"
-                     例子: "请设计一个详细且易于理解的用户登录时序图，以清晰地展示整个用户登录过程中的各个步骤及参与者之间的交互。此图应包含用户输入凭证的环节、系统对这些凭证进行验证的过程，以及根据验证结果返回的成功或失败的响应。同时，图中应标明各参与者，包括用户、前端界面、后端服务器和数据库等，以及它们之间的消息传递顺序。通过这样的时序图，可以直观地理解用户登录的工作流程及其关键环节，从而提升系统的可用性和用户体验。"
-                     接下来是我的描述，请根据例子，优化我的描述，使其更加清晰和完整：
-                      ${description}`,
+            content: `作为一位精通 Mermaid 图表绘制的专家，请根据以下内容优化用户提供的描述，使其更加清晰、完整且适合用于 Mermaid 图表的设计。请注意，返回的内容应为文字描述，而不是 Mermaid 的代码。
+
+要求：优化后的描述需符合示例中的格式与要求，语言简洁明了，总字数不超过 400 字。
+示例：
+请设计一个详细且易于理解的用户登录时序图，清晰展示用户登录过程中的各个步骤及参与者之间的交互。此图应包括：用户输入凭证的环节、系统验证凭证的过程，以及根据验证结果返回成功或失败响应的流程。图中需标明所有参与者（如用户、前端界面、后端服务器和数据库等）及其之间的消息传递顺序。通过该时序图，可以直观了解用户登录的完整流程及关键环节，从而提升系统的可用性和用户体验。
+接下来是用户的描述，请基于示例的要求和格式进行优化，使其适用于 Mermaid 支持的各种图表类型（如流程图、时序图、甘特图、状态图等）。请确保返回的是文字描述，而非 Mermaid 的代码，并使表达更加清晰和完整：
+${description}`,
           },
         ],
         model: "deepseek-chat",
@@ -401,9 +403,6 @@ const Independent: React.FC = () => {
   // 第二步：生成 Mermaid DSL
   const generateMermaidCode = async (description: string) => {
     try {
-      console.log(process.env.NEXT_PUBLIC_OPENAI_API_BASE_URL);
-      console.log(process.env.NEXT_PUBLIC_OPENAI_API_KEY);
-      debugger;
       const openai = new OpenAI({
         baseURL: process.env.NEXT_PUBLIC_OPENAI_API_BASE_URL,
         apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
@@ -414,16 +413,20 @@ const Independent: React.FC = () => {
         messages: [
           {
             role: "system",
-            content: `请根据以下流程描述生成一个 Mermaid 流程图的 DSL 代码：
-                   ${description}
-                   要求：
-                   1. 使用 graph TD 语法
-                   2. 节点 ID 要有意义且唯一
-                   3. 确保语法正确
-                   4. 适当使用不同的形状和样式
-                   5. 只返回 Mermaid DSL 代码，不要其他解释,
-                   6. 不要使用任何注释
-                   7. 不要使用任何代码块
+            content: `请根据以下描述生成一个 Mermaid 的 DSL 代码：
+                        ${description}
+
+                        要求：
+
+                1. 自动判断最合适的 Mermaid 图表类型（如 sequenceDiagram、graph TD、stateDiagram 等）
+                2. 使用正确的语法和合适的图表类型
+                3. 节点 ID 必须有意义且唯一
+                4. 确保语法正确
+                5. 适当使用不同的形状和样式
+                6. 只返回 Mermaid DSL 代码，不要其他解释
+                7. 不要使用任何注释
+                8. 不要使用任何代码块
+                9. 不要出现 \`\`\` 代码块
                    `,
           },
         ],
@@ -457,7 +460,7 @@ const Independent: React.FC = () => {
       //     }),
       //   });
       //   const data = await response.json();
-      setMermaidCode(data.mermaidCode);
+      //   setMermaidCode(data.mermaidCode);
     } catch (error) {
       console.error("生成 Mermaid 代码失败:", error);
       throw error;

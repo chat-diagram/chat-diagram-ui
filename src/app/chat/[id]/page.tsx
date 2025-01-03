@@ -20,7 +20,6 @@ import {
   FireOutlined,
   HeartOutlined,
   PaperClipOutlined,
-  PlusOutlined,
   ReadOutlined,
   ShareAltOutlined,
   SmileOutlined,

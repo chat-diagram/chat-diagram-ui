@@ -19,7 +19,8 @@ const LiveEditor = () => {
 
     try {
       // 先验证语法
-      await mermaid.parse(code);
+      const parseResult = await mermaid.parse(code);
+      console.log("result", parseResult);
 
       // 语法正确才进行渲染
       console.log("render");
@@ -29,7 +30,7 @@ const LiveEditor = () => {
       setMermaidContent(result.svg);
       setIsError(false);
     } catch (error) {
-      console.error("Mermaid 渲染错误:", error);
+      console.log("Mermaid 渲染错误:", error);
       setIsError(true);
       // 发生错误时不更新 mermaidContent，保留上次的正确结果
     }

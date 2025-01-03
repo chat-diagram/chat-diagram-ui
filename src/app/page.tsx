@@ -1,10 +1,8 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sender } from "@ant-design/x";
 import { X } from "lucide-react";
 import { useState } from "react";
-import "@ant-design/v5-patch-for-react-19";
 
 export default function Home() {
   const [showUpgrade, setShowUpgrade] = useState(true);
