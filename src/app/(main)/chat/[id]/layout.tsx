@@ -1,43 +1,9 @@
 "use client";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import {
-  Attachments,
-  Bubble,
-  Conversations,
-  Prompts,
-  Sender,
-  Welcome,
-  useXAgent,
-  useXChat,
-} from "@ant-design/x";
 import { createStyles } from "antd-style";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-
-import {
-  CloudUploadOutlined,
-  CommentOutlined,
-  EllipsisOutlined,
-  FireOutlined,
-  HeartOutlined,
-  PaperClipOutlined,
-  PlusOutlined,
-  ReadOutlined,
-  ShareAltOutlined,
-  SmileOutlined,
-} from "@ant-design/icons";
-import { Badge, Button, type GetProp, Space } from "antd";
 import { useParams } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LiveEditor from "./@live-editor/page";
 
 const useStyle = createStyles(({ token, css }) => {
@@ -129,6 +95,8 @@ interface ChatContextType {
   setMermaidCode: (code: string) => void;
   enhancedDescription: string;
   setEnhancedDescription: (desc: string) => void;
+  showRightPanel: boolean;
+  setShowRightPanel: (show: boolean) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -136,6 +104,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 function ChatProvider({ children }: { children: React.ReactNode }) {
   const [mermaidCode, setMermaidCode] = useState("");
   const [enhancedDescription, setEnhancedDescription] = useState("");
+  const [showRightPanel, setShowRightPanel] = useState(true);
 
   return (
     <ChatContext.Provider
@@ -144,6 +113,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setMermaidCode,
         enhancedDescription,
         setEnhancedDescription,
+        showRightPanel,
+        setShowRightPanel,
       }}
     >
       {children}
@@ -161,6 +132,8 @@ export function useChatContext() {
 
 const Layout = ({ chat }: { chat: React.ReactNode }) => {
   const { id } = useParams();
+  console.log("id", id);
+  const { showRightPanel, setShowRightPanel } = useChatContext();
 
   // ==================== Style ====================
   const { styles } = useStyle();
@@ -189,18 +162,19 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
     );
   };
 
-  const [showRightPanel, setShowRightPanel] = useState(true);
-
   // ==================== Nodes ====================
 
   // ==================== Render =================
   return (
-    <ChatProvider>
-      <div className={styles.layout}>
-        <PanelGroup direction="horizontal" className="w-full h-full">
-          <Panel minSize={30}>{chat}</Panel>
-          <PanelResizeHandleWithStyle onClick={() => {}} />
-          {/* <Panel>
+    <div className={styles.layout}>
+      <PanelGroup direction="horizontal" className="w-full h-full">
+        <Panel minSize={30}>{chat}</Panel>
+        <PanelResizeHandleWithStyle
+          onClick={() => {
+            setShowRightPanel(!showRightPanel);
+          }}
+        />
+        {/* <Panel>
           <PanelGroup direction="vertical">
             <Panel>top</Panel>
             <PanelResizeHandleWithStyle vertical={true} />
@@ -217,15 +191,21 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
         </Panel>
         <PanelResizeHandleWithStyle /> */}
 
-          {showRightPanel && (
-            <Panel minSize={30}>
-              <LiveEditor />
-            </Panel>
-          )}
-        </PanelGroup>
-      </div>
-    </ChatProvider>
+        {showRightPanel && (
+          <Panel minSize={30}>
+            <LiveEditor />
+          </Panel>
+        )}
+      </PanelGroup>
+    </div>
   );
 };
 
-export default Layout;
+const LayoutWithProvider = ({ chat }: { chat: React.ReactNode }) => {
+  return (
+    <ChatProvider>
+      <Layout chat={chat} />
+    </ChatProvider>
+  );
+};
+export default LayoutWithProvider;

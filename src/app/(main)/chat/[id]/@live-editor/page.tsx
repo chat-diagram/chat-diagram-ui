@@ -52,7 +52,7 @@ const LiveEditor = () => {
 
   const { mermaidCode, setMermaidCode } = useChatContext();
   return (
-    <div className="w-full h-screen">
+    <div className="w-full flex flex-col h-screen">
       <div className="w-full p-1 border-b border-gray-200">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
@@ -89,9 +89,13 @@ const LiveEditor = () => {
           height="100%"
         />
       </div>
-      <div className={`${activeTab === "preview" ? "block" : "hidden"}`}>
+      <div
+        className={`${
+          activeTab === "preview" ? "block" : "hidden"
+        } flex-1 overflow-auto`}
+      >
         <div
-          className={`w-full h-full p-4 ${isError ? "opacity-50" : ""}`}
+          className={`w-full h-full p-4  ${isError ? "opacity-50" : ""}`}
           dangerouslySetInnerHTML={{ __html: mermaidContent }}
         ></div>
         {isError && (

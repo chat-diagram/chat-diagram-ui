@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
+import { initEditor } from "@/lib/monacoExtra";
 
 interface MonacoEditorProps {
   value?: string;
@@ -15,13 +16,13 @@ interface MonacoEditorProps {
 const MonacoEditor = ({
   value = "",
   onChange,
-  language = "javascript",
+  language = "mermaid",
   theme = "vs-dark",
   height = "500px",
 }: MonacoEditorProps) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-  const handleEditorDidMount: OnMount = (editor) => {
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
     // 设置一些编辑器选项
     editor.updateOptions({
@@ -30,6 +31,7 @@ const MonacoEditor = ({
       fontSize: 14,
       tabSize: 2,
     });
+    initEditor(monaco);
   };
 
   // 添加 useEffect 监听 value 变化
