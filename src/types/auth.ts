@@ -9,9 +9,11 @@ export interface SignupCredentials extends LoginCredentials {
 
 export interface User {
   id: string;
-  name: string;
   email: string;
   username: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 export interface AuthResponse {

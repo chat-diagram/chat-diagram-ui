@@ -1,3 +1,4 @@
+"use client";
 import { QueryProvider } from "@/providers/query-provider";
 
 import "@ant-design/v5-patch-for-react-19";

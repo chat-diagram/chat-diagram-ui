@@ -25,6 +25,10 @@ import { Badge, Button, type GetProp, Space } from "antd";
 import { useChatContext } from "../layout";
 import { Sparkles } from "lucide-react";
 import { openaiApi } from "@/lib/api/openai";
+import { CustomSender } from "@/components/sender";
+import { useSender } from "@/hooks/use-sender";
+import { useGetDiagram, useGetDiagramsByProjectId } from "@/hooks/use-diagrams";
+import { useParams } from "next/navigation";
 
 const renderTitle = (icon: React.ReactElement, title: string) => (
   <Space align="start">
@@ -216,7 +220,7 @@ const Independent: React.FC = () => {
   // ==================== State ====================
   const [headerOpen, setHeaderOpen] = React.useState(false);
 
-  const [content, setContent] = React.useState("");
+  // const [content, setContent] = React.useState("");
 
   const [activeKey, setActiveKey] = React.useState(
     defaultConversationsItems[0].key
@@ -250,7 +254,6 @@ const Independent: React.FC = () => {
     setShowRightPanel(true);
     onRequest(nextContent);
     setContent("");
-    // setMermaidCode(nextContent);
     generateMermaidCode(nextContent);
   };
 
@@ -344,52 +347,56 @@ const Independent: React.FC = () => {
   );
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const { id } = useParams();
+  const { data: diagrams } = useGetDiagram(id as string);
+  console.log("diagrams", diagrams);
   // const enhance = useEnhance();
 
   // 第一步：增强用户描述
-  const enhanceDescription = async (description: string) => {
-    try {
-      setIsLoading(true);
-      const response = await openaiApi.enhanceStream({ description });
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No reader available");
-      let fullResponse = "";
+  // const enhanceDescription = async (description: string) => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await openaiApi.enhanceStream({ description });
+  //     const reader = response.body?.getReader();
+  //     if (!reader) throw new Error("No reader available");
+  //     let fullResponse = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+  //     while (true) {
+  //       const { done, value } = await reader.read();
+  //       if (done) break;
 
-        // 解析 SSE 格式数据
-        const text = new TextDecoder().decode(value);
-        const lines = text.split("\n");
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const jsonData = JSON.parse(line.slice(6));
-              if (jsonData.content) {
-                fullResponse += jsonData.content;
-                // 实时更新UI
-                setEnhancedDescription(fullResponse);
-                setContent(fullResponse);
-              }
-            } catch (e) {
-              // 忽略非JSON格式的行
-              continue;
-            }
-          }
-        }
-      }
-      return fullResponse;
-    } catch (error) {
-      console.error("增强描述失败:", error);
-      throw error;
-    }
-  };
+  //       // 解析 SSE 格式数据
+  //       const text = new TextDecoder().decode(value);
+  //       const lines = text.split("\n");
+  //       for (const line of lines) {
+  //         if (line.startsWith("data: ")) {
+  //           try {
+  //             const jsonData = JSON.parse(line.slice(6));
+  //             if (jsonData.content) {
+  //               fullResponse += jsonData.content;
+  //               // 实时更新UI
+  //               setEnhancedDescription(fullResponse);
+  //               setContent(fullResponse);
+  //             }
+  //           } catch (e) {
+  //             // 忽略非JSON格式的行
+  //             continue;
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return fullResponse;
+  //   } catch (error) {
+  //     console.error("增强描述失败:", error);
+  //     throw error;
+  //   }
+  // };
 
   // 第二步：生成 Mermaid DSL
   const generateMermaidCode = async (description: string) => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
       const response = await openaiApi.mermaidStream({ description });
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
@@ -423,11 +430,14 @@ const Independent: React.FC = () => {
       console.error("生成 Mermaid 代码失败:", error);
       throw error;
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   const { setMermaidCode, setEnhancedDescription } = useChatContext();
+
+  const { content, setContent, loading, setLoading, enhanceDescription } =
+    useSender();
   // ==================== Render =================
   return (
     <div className={styles.chat}>
@@ -444,7 +454,7 @@ const Independent: React.FC = () => {
       {/* 🌟 提示词 */}
       <Prompts items={senderPromptsItems} onItemClick={onPromptsItemClick} />
       {/* 🌟 输入框 */}
-      <Sender
+      {/* <Sender
         value={content}
         header={senderHeader}
         onSubmit={onSubmit}
@@ -452,6 +462,15 @@ const Independent: React.FC = () => {
         prefix={attachmentsNode}
         loading={agent.isRequesting()}
         className={styles.sender}
+      /> */}
+
+      <CustomSender
+        content={content}
+        onEnhance={() => enhanceDescription(content)}
+        onSubmit={() => onSubmit(content)}
+        setContent={setContent}
+        loading={loading}
+        setLoading={setLoading}
       />
     </div>
   );

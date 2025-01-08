@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AddProjectDialog } from "@/components/add-project-dialog";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -28,7 +29,8 @@ export default function Page({ children }: { children: React.ReactNode }) {
     //   >
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset >{children}</SidebarInset>
+      <AddProjectDialog />
     </SidebarProvider>
     //   </body>
     // </html>

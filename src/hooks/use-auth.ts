@@ -4,19 +4,20 @@ import { authApi } from "@/lib/api/auth";
 // import type { LoginCredentials, SignupCredentials } from "@/types/auth";
 import { useRouter } from "next/navigation";
 import { queryClient } from "@/lib/request";
+import { useAppStore } from "@/store/app";
 
 export function useLogin() {
   const router = useRouter();
+  const { setUser } = useAppStore();
 
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      debugger;
-
       // 保存 token
       localStorage.setItem("token", data.token);
       // 更新缓存中的用户信息
       queryClient.setQueryData(["user"], data.user);
+      setUser(data.user);
       // 跳转到首页
       router.push("/");
     },

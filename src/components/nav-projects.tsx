@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  ChartNoAxesGantt,
+  Circle,
   Folder,
   Forward,
+  Icon,
   MoreHorizontal,
   Trash2,
   type LucideIcon,
@@ -24,29 +27,39 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useDeleteProject, useGetProjects } from "@/hooks/use-projects";
+import { Project } from "@/lib/api/projects";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export function NavProjects({
-  projects,
-}: {
-  projects: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
-}) {
+export function NavProjects({ projects }: { projects: Project[] }) {
+  const router = useRouter();
+
   const { isMobile } = useSidebar();
+
+  const visibleCount = 3;
+  const hasMoreProjects = projects.length > visibleCount;
+  const visibleProjects = projects.slice(0, visibleCount);
+  const currentPath = usePathname();
+
+  const { mutate: deleteProject } = useDeleteProject();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
+        {visibleProjects.map((item) => (
+          <SidebarMenuItem key={item.id}>
+            <SidebarMenuButton
+              asChild
+              isActive={currentPath === `/chat/projects/${item.id}`}
+            >
+              <Link href={`/chat/projects/${item.id}`}>
+                {/* <item.name /> */}
+                <ChartNoAxesGantt />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -60,7 +73,11 @@ export function NavProjects({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    router.push(`/chat/projects/${item.id}`);
+                  }}
+                >
                   <Folder className="text-muted-foreground" />
                   <span>View Project</span>
                 </DropdownMenuItem>
@@ -69,7 +86,7 @@ export function NavProjects({
                   <span>Share Project</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => deleteProject(item.id)}>
                   <Trash2 className="text-muted-foreground" />
                   <span>Delete Project</span>
                 </DropdownMenuItem>
@@ -77,12 +94,22 @@ export function NavProjects({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
+        {hasMoreProjects && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="text-sidebar-foreground/70">
+              <Link href="/chat/projects">
+                <MoreHorizontal className="text-sidebar-foreground/70" />
+                <span>More</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
+        {/* <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal className="text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
-        </SidebarMenuItem>
+        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   );

@@ -30,7 +30,7 @@ export const request = {
     endpoint: string,
     config: RequestInit,
     onStream?: (data: T) => void
-  ): Promise<T | Response> {
+  ): Promise<T> {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...config,
       headers: {
@@ -39,16 +39,11 @@ export const request = {
         ...config.headers,
       },
     });
-    debugger;
 
-    // debugger;
-
-    debugger;
     // 检查是否为流式响应
     const isStream = response.headers.get("content-type")?.includes("stream");
 
     if (isStream) {
-      debugger;
       return response; // 对于流式请求直接返回 response
     }
     const data: ApiResponse<T> = await response.json();
@@ -75,6 +70,9 @@ export const request = {
       method: "POST",
       body: JSON.stringify(body),
     });
+  },
+  delete<T>(endpoint: string, config?: RequestInit) {
+    return this.fetch<T>(endpoint, { ...config, method: "DELETE" });
   },
 
   // async fetchStream(
