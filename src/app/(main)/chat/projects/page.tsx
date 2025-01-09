@@ -13,14 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useProjectsStore } from "@/store/projects";
-import {
-  ChartNoAxesGantt,
-  MoreHorizontal,
-  Search,
-  Shuffle,
-} from "lucide-react";
-import { Project, projectsApi } from "@/lib/api/projects";
-import { useEffect, useState } from "react";
+import { ChartNoAxesGantt, MoreHorizontal, Search } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/store/app";
 import { useDeleteProject, useGetProjects } from "@/hooks/use-projects";
@@ -47,9 +41,6 @@ export default function ChatProjectsPage() {
 
   const { data: projects = [], isLoading, error } = useGetProjects();
 
-  //   useEffect(() => {
-  //     fetchProjects();
-  //   }, []);
   const { mutate: deleteProject } = useDeleteProject();
 
   return (

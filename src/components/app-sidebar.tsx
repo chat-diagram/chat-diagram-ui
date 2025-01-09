@@ -181,10 +181,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SystemLogo />
       </SidebarHeader>
       <SidebarContent className="gap-0">
-        <NavAddConversation
+        {/* <NavAddConversation
           conversationsItems={conversationsItems}
           onAddConversation={handleAddConversation}
-        />
+        /> */}
         <NavMain items={data.navMain} />
         <NavProjects projects={projects} />
         {/* <NavConversations conversationsItems={conversationsItems} /> */}

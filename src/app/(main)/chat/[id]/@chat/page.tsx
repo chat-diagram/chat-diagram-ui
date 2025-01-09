@@ -3,7 +3,7 @@ import { Bubble, useXAgent, useXChat } from "@ant-design/x";
 import { createStyles } from "antd-style";
 import React, { useEffect, useState } from "react";
 
-import { type GetProp, Space } from "antd";
+import { Card, message, type GetProp } from "antd";
 import { useChatContext } from "../layout";
 import { openaiApi } from "@/lib/api/openai";
 import { CustomSender } from "@/components/sender";
@@ -19,8 +19,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { diagramsApi } from "@/lib/api/diagrams";
-import { MessageInfo } from "@ant-design/x/es/useXChat";
+import { diagramsApi, DiagramVersion } from "@/lib/api/diagrams";
+import { MessageInfo, MessageStatus } from "@ant-design/x/es/useXChat";
 import { Avatar as AvatarUser } from "@/components/avatar";
 import { LocalIcons } from "@/components/local-icons";
 import { useAppStore } from "@/store/app";
@@ -31,6 +31,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDiagramsStore } from "@/store/diagrams";
+import { queryClient } from "@/lib/request";
 
 const useStyle = createStyles(({ token, css }) => {
   return {
@@ -113,6 +114,23 @@ const useStyle = createStyles(({ token, css }) => {
       width: calc(100% - 24px);
       margin: 0 12px 24px 12px;
     `,
+    loadingDots: css`
+      display: inline-block;
+      &::after {
+        content: "...";
+        animation: dots 1.5s steps(4, end) infinite;
+        display: inline-block;
+        width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      @keyframes dots {
+        to {
+          width: 1.25em;
+        }
+      }
+    `,
   };
 });
 
@@ -158,28 +176,13 @@ const Independent: React.FC = () => {
 
   // ==================== State ====================
 
-  // const [content, setContent] = React.useState("");
-
   // ==================== Runtime ====================
 
   // ==================== Runtime ====================
   const [agent] = useXAgent({
     request: async ({ message }, { onUpdate, onSuccess }) => {
       console.log("message", message);
-
-      // const stream = transformStream(message as string);
-      // console.log("stream", stream);
-      // let count = 0;
-      // setInterval(() => {
-      //   onUpdate(`Mock success return. You said: ${message}.count:${count}`);
-      //   count++;
-      //   if (count > 10) {
-      //     onSuccess(`Mock success return. You said: ${message}`);
-      //   }
-      // }, 1000);
-
       await generateMermaidCode(message as string, onUpdate, onSuccess);
-      // onSuccess(`Mock success return. You said: ${message}`);
     },
   });
 
@@ -187,12 +190,6 @@ const Independent: React.FC = () => {
     agent,
   });
   console.log("messages", messages);
-
-  // useEffect(() => {
-  //   if (activeKey !== undefined) {
-  //     setMessages([]);
-  //   }
-  // }, [activeKey]);
 
   const { setShowRightPanel } = useChatContext();
   // ==================== Event ====================
@@ -202,8 +199,6 @@ const Independent: React.FC = () => {
     onRequest(nextContent);
     setContent("");
   };
-
-  // const searchParams = useSearchParams();
 
   const queryProjectId = searchParams.get("pid");
   const queryDescription = searchParams.get("d");
@@ -225,7 +220,10 @@ const Independent: React.FC = () => {
         });
         messages.push({
           id: `ai-${Date.now()}-${queryProjectId}`,
-          message: "",
+          message: JSON.stringify({
+            diagramId: "new",
+            mermaidCode: "",
+          }),
           status: "success",
         });
         setMessages(messages);
@@ -259,8 +257,14 @@ const Independent: React.FC = () => {
                   setMessages((prev) => {
                     const prevMessages = [...prev];
 
+                    // todo
                     prevMessages[prevMessages.length - 1].message =
-                      fullResponse;
+                      JSON.stringify({
+                        diagramId: jsonData.diagram.id,
+                        mermaidCode: fullResponse,
+                      });
+                    // fullResponse;
+
                     return prevMessages;
                   });
                 }
@@ -292,11 +296,16 @@ const Independent: React.FC = () => {
       });
       messages.push({
         id: `ai-${Date.now()}-${version.id}`,
-        message: version.mermaidCode,
+        // message: version.mermaidCode,
+        message: JSON.stringify({
+          diagramId: version.id,
+          mermaidCode: version.mermaidCode,
+        }),
         status: "success",
       });
       if (index === diagrams?.versions.length - 1) {
         setMermaidCode(version.mermaidCode);
+        setIsShowDiagram(version);
       }
     });
     if (diagrams?.id) {
@@ -305,13 +314,57 @@ const Independent: React.FC = () => {
   }, [diagrams?.id]);
 
   // ==================== Nodes ====================
-
+  const [isShowDiagram, setIsShowDiagram] = useState<DiagramVersion | null>(
+    null
+  );
+  const messageRender = (message: string, status: MessageStatus) => {
+    if (status !== "local") {
+      try {
+        const { diagramId, mermaidCode } = JSON.parse(message);
+        return (
+          <div style={{ marginBottom: 12 }}>
+            <Card
+              onClick={() => {
+                setIsShowDiagram(
+                  diagrams?.versions.find((one) => one.id === diagramId) || null
+                );
+              }}
+              hoverable
+              className="hover:shadow-md"
+              style={{
+                outline:
+                  isShowDiagram?.id === diagramId ? "1px solid #1677ff" : "",
+              }}
+            >
+              {/* {mermaidCode} */}
+              <span className="text-sm text-gray-500">
+                {diagramId === "new" ? (
+                  <div className="flex items-center">
+                    Generating diagram
+                    <div style={{ width: "2em" }}>
+                      <span className={styles.loadingDots}></span>
+                    </div>
+                  </div>
+                ) : (
+                  "Generated diagram"
+                )}
+              </span>
+            </Card>
+          </div>
+        );
+      } catch (e) {
+        return <div>{message}</div>;
+      }
+    }
+    return message;
+  };
   const items: GetProp<typeof Bubble.List, "items"> = messages.map(
     ({ id, message, status }) => ({
       key: id,
       // loading: status === "loading",
       role: status === "local" ? "local" : "ai",
-      content: message,
+      content: messageRender(message, status),
+      variant: "borderless",
     })
   );
 
@@ -324,18 +377,16 @@ const Independent: React.FC = () => {
   ) => {
     try {
       setIsLoading(true);
-      const respons = await diagramsApi.createDiagramVersion(id as string, {
+      const response = await diagramsApi.createDiagramVersion(id as string, {
         comment: description,
       });
-      console.log("respons", respons);
-      const response = await openaiApi.mermaidStream({ description });
+      // const response = await openaiApi.mermaidStream({ description });
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
       let fullResponse = "";
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
 
         // 解析sse数据
         // 解析 SSE 格式数据
@@ -349,17 +400,60 @@ const Independent: React.FC = () => {
                 fullResponse += jsonData.content;
                 // 实时更新UI
                 setMermaidCode(fullResponse);
-                onUpdate(fullResponse);
-                console.log("onupdate", fullResponse);
+                // onUpdate(fullResponse);
+                onUpdate(
+                  JSON.stringify({
+                    diagramId: "new",
+                    mermaidCode: fullResponse,
+                  })
+                );
               }
+              // todo 在流式数据的末尾拿到这次的version的id 但是目前拿不到
+
               if (jsonData.version) {
-                onSuccess(jsonData.version.mermaidCode);
+                // onSuccess(jsonData.version.mermaidCode);
+                setIsShowDiagram(jsonData.version);
+                message.success("生成成功");
+
+                onSuccess(
+                  JSON.stringify({
+                    diagramId: jsonData.version.id,
+                    mermaidCode: jsonData.version.mermaidCode,
+                  })
+                );
+                setMessages((prev) => {
+                  const prevMessages = [...prev];
+
+                  // todo
+                  prevMessages[prevMessages.length - 1].message =
+                    JSON.stringify({
+                      diagramId: jsonData.diagram.id,
+                      mermaidCode: jsonData.version.mermaidCode,
+                    });
+
+                  // fullResponse;
+
+                  return prevMessages;
+                });
+                await queryClient.invalidateQueries({
+                  queryKey: ["diagram", id],
+                  exact: true,
+                  refetchType: "all",
+                });
               }
             } catch (e) {
               // 忽略非JSON格式的行
               continue;
             }
           }
+        }
+        if (done) {
+          // window.location.reload();
+          // router.replace(`/chat/${id}`, { forceRefresh: true });
+          // router.refresh();
+          // queryClient.invalidateQueries({ queryKey: ["diagram", id] });
+
+          break;
         }
       }
     } catch (error) {
@@ -379,6 +473,11 @@ const Independent: React.FC = () => {
   const handleRenameDiagram = () => {
     setRenameDiagramDialogOpen(true, diagrams);
   };
+
+  // useEffect(() => {
+  //   // debugger;
+  //   setMermaidCode(isShowDiagram?.mermaidCode || "");
+  // }, [isShowDiagram?.id]);
   // ==================== Render =================
   return (
     <>
@@ -421,23 +520,22 @@ const Independent: React.FC = () => {
         </header>
       )}
       <div className={styles.chat}>
-        <div className="flex-1 contain-strict overflow-auto">
-          {/* 🌟 消息列表 */}
-          <Bubble.List
-            items={
-              items.length > 0
-                ? items
-                : [{ content: null, variant: "borderless" }]
-            }
-            roles={roles(user!)}
-            className={styles.messages}
-          />
-          {/* 🌟 提示词 */}
-          {/* <Prompts
-            items={senderPromptsItems}
-            onItemClick={onPromptsItemClick}
-          /> */}
-        </div>
+        {/* <div
+          className="flex-1 contain-strict overflow-auto"
+          style={{ minHeight: 0 }}
+        > */}
+        {/* 🌟 消息列表 */}
+        <Bubble.List
+          autoScroll
+          items={
+            items.length > 0
+              ? items
+              : [{ content: null, variant: "borderless" }]
+          }
+          roles={roles(user!)}
+          className={styles.messages}
+        />
+        {/* </div> */}
 
         {/* 🌟 输入框 */}
         <div>

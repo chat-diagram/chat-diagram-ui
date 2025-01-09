@@ -18,14 +18,10 @@ const LiveEditor = () => {
 
     try {
       // 先验证语法
-      const parseResult = await mermaid.parse(code);
-      console.log("result", parseResult);
+      await mermaid.parse(code);
 
       // 语法正确才进行渲染
-      console.log("render");
       const result = await mermaid.render("mermaid-preview", code);
-      //   const result = await mermaid.render("mermaid-preview", code);
-      console.log("result", result);
       setMermaidContent(result.svg);
       setIsError(false);
     } catch (error) {
@@ -60,7 +56,6 @@ const LiveEditor = () => {
   //   console.log("useEffect mermaidCode", mermaidCode);
   // }, [mermaidCode]);
   useEffect(() => {
-    console.log("useEffect mermaidContent", mermaidContent);
     renderMermaid(mermaidCode);
   }, [mermaidCode]);
   const handleEditorDidMount = () =>
