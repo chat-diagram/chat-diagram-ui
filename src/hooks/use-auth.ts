@@ -26,10 +26,12 @@ export function useLogin() {
 
 export function useSignup() {
   const router = useRouter();
+  const { setUser } = useAppStore();
 
   return useMutation({
     mutationFn: authApi.signup,
     onSuccess: (data) => {
+      setUser(data.user);
       localStorage.setItem("token", data.token);
       queryClient.setQueryData(["user"], data.user);
       router.push("/");

@@ -65,6 +65,19 @@ export default function ChatProjectsPage() {
           ></Input>
         </div>
         <Separator />
+        {projects.length === 0 && (
+          <div className="px-4 space-y-2 py-4">
+            <Card
+              className="flex flex-col justify-center items-center h-96"
+              style={{ height: "600px" }}
+            >
+              <div>No Projects</div>
+              <div className="text-sm text-muted-foreground">
+                To get started, create a new project.{" "}
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
 
       <div className="overflow-y-auto gap-4 py-4 w-full flex-col flex flex-1 z-0">
