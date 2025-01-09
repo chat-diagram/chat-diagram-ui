@@ -96,7 +96,7 @@ export default function ProjectDetailPage() {
         </div>
         <Separator /> */}
 
-        <div className="px-2 space-y-2 py-4">
+        <div className="px-4 space-y-2 py-4">
           <CustomSender
             content={content}
             onEnhance={() =>
