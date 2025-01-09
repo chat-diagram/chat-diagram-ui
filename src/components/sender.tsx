@@ -4,7 +4,6 @@ import { message, Badge, Button, GetProp } from "antd";
 import { Sparkles, X } from "lucide-react";
 import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import { openaiApi } from "@/lib/api/openai";
 
 export const CustomSender = ({
   content,
@@ -91,7 +90,7 @@ export const CustomSender = ({
         <TooltipTrigger asChild>
           <Button
             type="text"
-            onClick={() => onEnhance(content)}
+            onClick={() => onEnhance()}
             icon={
               <Sparkles
                 style={{ color: "#1890FF", width: "14px", height: "22px" }}
@@ -105,6 +104,20 @@ export const CustomSender = ({
   );
   const [recording, setRecording] = React.useState(false);
 
+  const headerNode = (
+    <Sender.Header
+      open={showUpgrade}
+      title={
+        <div className="px-2">
+          <span className="text-sm font-medium text-gray-900 ">
+            Upgrade to Pro to unlock all features
+          </span>
+        </div>
+      }
+      onOpenChange={setShowUpgrade}
+    />
+  );
+
   return (
     <div className="relative flex flex-col gap-4">
       <div
@@ -112,7 +125,7 @@ export const CustomSender = ({
           showUpgrade ? " flex-col right-0 left-0" : ""
         }`}
       >
-        {showUpgrade && (
+        {/* {showUpgrade && (
           <div className="flex mb-2 items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-900">
@@ -126,9 +139,10 @@ export const CustomSender = ({
               <X className="h-4 w-4" />
             </button>
           </div>
-        )}
+        )} */}
         <Sender
           value={content}
+          header={headerNode}
           onSubmit={onSubmit}
           onChange={setContent}
           prefix={enhanceNode}
@@ -154,7 +168,6 @@ export const CustomSender = ({
             width: "100%",
             borderRadius: "0.5rem",
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-            marginTop: "-6px",
           }}
           placeholder="Type your message here..."
         />

@@ -1,48 +1,36 @@
 "use client";
-import {
-  Attachments,
-  Bubble,
-  Prompts,
-  Sender,
-  Welcome,
-  useXAgent,
-  useXChat,
-} from "@ant-design/x";
+import { Bubble, useXAgent, useXChat } from "@ant-design/x";
 import { createStyles } from "antd-style";
 import React, { useEffect, useState } from "react";
-import {
-  CloudUploadOutlined,
-  CommentOutlined,
-  EllipsisOutlined,
-  FireOutlined,
-  HeartOutlined,
-  PaperClipOutlined,
-  ReadOutlined,
-  ShareAltOutlined,
-  SmileOutlined,
-} from "@ant-design/icons";
-import { Badge, Button, type GetProp, Space } from "antd";
+
+import { type GetProp, Space } from "antd";
 import { useChatContext } from "../layout";
-import { Sparkles } from "lucide-react";
 import { openaiApi } from "@/lib/api/openai";
 import { CustomSender } from "@/components/sender";
 import { useSender } from "@/hooks/use-sender";
-import { useGetDiagram, useGetDiagramsByProjectId } from "@/hooks/use-diagrams";
-import { useParams } from "next/navigation";
-
-const renderTitle = (icon: React.ReactElement, title: string) => (
-  <Space align="start">
-    {icon}
-    <span>{title}</span>
-  </Space>
-);
-
-const defaultConversationsItems = [
-  {
-    key: "0",
-    label: "What is Ant Design X?",
-  },
-];
+import { useGetDiagram } from "@/hooks/use-diagrams";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from "next/link";
+import { diagramsApi } from "@/lib/api/diagrams";
+import { MessageInfo } from "@ant-design/x/es/useXChat";
+import { Avatar as AvatarUser } from "@/components/avatar";
+import { LocalIcons } from "@/components/local-icons";
+import { useAppStore } from "@/store/app";
+import { User } from "@/types/auth";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useDiagramsStore } from "@/store/diagrams";
 
 const useStyle = createStyles(({ token, css }) => {
   return {
@@ -54,7 +42,7 @@ const useStyle = createStyles(({ token, css }) => {
       border-radius: ${token.borderRadius}px;
       display: flex;
       background: ${token.colorBgContainer};
-      font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
+      // font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
 
       .ant-prompts {
         color: ${token.colorText};
@@ -73,7 +61,8 @@ const useStyle = createStyles(({ token, css }) => {
       overflow-y: auto;
     `,
     chat: css`
-      height: 100%;
+      // height: 100%;
+      flex: 1;
       width: 100%;
       max-width: 700px;
       margin: 0 auto;
@@ -82,9 +71,13 @@ const useStyle = createStyles(({ token, css }) => {
       flex-direction: column;
       padding: ${token.paddingLG}px;
       gap: 16px;
+      justify-content: space-between;
+      min-height: 0;
     `,
     messages: css`
       flex: 1;
+      shrink: 1;
+      min-height: 0;
     `,
     placeholder: css`
       padding-top: 32px;
@@ -123,82 +116,15 @@ const useStyle = createStyles(({ token, css }) => {
   };
 });
 
-const placeholderPromptsItems: GetProp<typeof Prompts, "items"> = [
-  {
-    key: "1",
-    label: renderTitle(
-      <FireOutlined style={{ color: "#FF4D4F" }} />,
-      "Hot Topics"
-    ),
-    description: "What are you interested in?",
-    children: [
-      {
-        key: "1-1",
-        description: `What's new in X?`,
-      },
-      {
-        key: "1-2",
-        description: `What's AGI?`,
-      },
-      {
-        key: "1-3",
-        description: `Where is the doc?`,
-      },
-    ],
-  },
-  {
-    key: "2",
-    label: renderTitle(
-      <ReadOutlined style={{ color: "#1890FF" }} />,
-      "Design Guide"
-    ),
-    description: "How to design a good product?",
-    children: [
-      {
-        key: "2-1",
-        icon: <HeartOutlined />,
-        description: `Know the well`,
-      },
-      {
-        key: "2-2",
-        icon: <SmileOutlined />,
-        description: `Set the AI role`,
-      },
-      {
-        key: "2-3",
-        icon: <CommentOutlined />,
-        description: `Express the feeling`,
-      },
-    ],
-  },
-];
-
-const senderPromptsItems: GetProp<typeof Prompts, "items"> = [
-  //   {
-  //     key: "1",
-  //     description: "Hot Topics",
-  //     icon: <FireOutlined style={{ color: "#FF4D4F" }} />,
-  //   },
-  //   {
-  //     key: "2",
-  //     description: "Design Guide",
-  //     icon: <ReadOutlined style={{ color: "#1890FF" }} />,
-  //   },
-  {
-    key: "3",
-    description: "优化描述",
-    icon: (
-      <div className="flex items-center justify-center w-[14px] h-[22px]">
-        <Sparkles style={{ color: "#1890FF", width: "14px", height: "22px" }} />
-      </div>
-    ),
-  },
-];
-
-const roles: GetProp<typeof Bubble.List, "roles"> = {
+const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
+  user: User
+) => ({
   ai: {
     placement: "start",
-    typing: { step: 5, interval: 20 },
+    // typing: { step: 5, interval: 20 },
+    avatar: {
+      icon: <LocalIcons.SystemLogo className="w-4 h-4" />,
+    },
     styles: {
       content: {
         borderRadius: 16,
@@ -206,46 +132,67 @@ const roles: GetProp<typeof Bubble.List, "roles"> = {
     },
   },
   local: {
-    placement: "end",
+    placement: "start",
     variant: "shadow",
+    avatar: {
+      icon: <AvatarUser name={user?.username} />,
+    },
   },
-};
+});
 
 const Independent: React.FC = () => {
-  //   const { id } = useParams();
+  const { user } = useAppStore();
+
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+  // const
+  const { id } = useParams();
+  // console.log("leilei", params);
+  const { data: diagramsData } = useGetDiagram(id as string);
+  // 在需要使用数据的地方进行条件判断
+  const diagrams = id !== "new" ? diagramsData : null;
 
   // ==================== Style ====================
   const { styles } = useStyle();
 
   // ==================== State ====================
-  const [headerOpen, setHeaderOpen] = React.useState(false);
 
   // const [content, setContent] = React.useState("");
 
-  const [activeKey, setActiveKey] = React.useState(
-    defaultConversationsItems[0].key
-  );
-
-  const [attachedFiles, setAttachedFiles] = React.useState<
-    GetProp<typeof Attachments, "items">
-  >([]);
+  // ==================== Runtime ====================
 
   // ==================== Runtime ====================
   const [agent] = useXAgent({
-    request: async ({ message }, { onSuccess }) => {
-      onSuccess(`Mock success return. You said: ${message}`);
+    request: async ({ message }, { onUpdate, onSuccess }) => {
+      console.log("message", message);
+
+      // const stream = transformStream(message as string);
+      // console.log("stream", stream);
+      // let count = 0;
+      // setInterval(() => {
+      //   onUpdate(`Mock success return. You said: ${message}.count:${count}`);
+      //   count++;
+      //   if (count > 10) {
+      //     onSuccess(`Mock success return. You said: ${message}`);
+      //   }
+      // }, 1000);
+
+      await generateMermaidCode(message as string, onUpdate, onSuccess);
+      // onSuccess(`Mock success return. You said: ${message}`);
     },
   });
 
   const { onRequest, messages, setMessages } = useXChat({
     agent,
   });
+  console.log("messages", messages);
 
-  useEffect(() => {
-    if (activeKey !== undefined) {
-      setMessages([]);
-    }
-  }, [activeKey]);
+  // useEffect(() => {
+  //   if (activeKey !== undefined) {
+  //     setMessages([]);
+  //   }
+  // }, [activeKey]);
 
   const { setShowRightPanel } = useChatContext();
   // ==================== Event ====================
@@ -254,149 +201,133 @@ const Independent: React.FC = () => {
     setShowRightPanel(true);
     onRequest(nextContent);
     setContent("");
-    generateMermaidCode(nextContent);
   };
 
-  const onPromptsItemClick: GetProp<typeof Prompts, "onItemClick"> = (info) => {
-    if (info.data.key === "3") {
-      enhanceDescription(content as string);
-      return;
+  // const searchParams = useSearchParams();
+
+  const queryProjectId = searchParams.get("pid");
+  const queryDescription = searchParams.get("d");
+  console.log("queryDescription", queryDescription);
+  console.log("queryProjectId", queryProjectId);
+
+  // 处理刚创建的情况
+  useEffect(() => {
+    const init = async () => {
+      if (queryDescription && queryProjectId) {
+        console.log("queryDescription", queryDescription);
+        console.log("queryProjectId", queryProjectId);
+        // setMessages([]);
+        const messages: MessageInfo<string>[] = [];
+        messages.push({
+          id: `local-${Date.now()}-${queryProjectId}`,
+          message: queryDescription,
+          status: "local",
+        });
+        messages.push({
+          id: `ai-${Date.now()}-${queryProjectId}`,
+          message: "",
+          status: "success",
+        });
+        setMessages(messages);
+
+        const response = await diagramsApi.createDiagram({
+          projectId: queryProjectId as string,
+          description: queryDescription as string,
+        });
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No reader available");
+        let fullResponse = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          // 解析 SSE 格式数据
+          const text = new TextDecoder().decode(value);
+          const lines = text.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const jsonData = JSON.parse(line.slice(6));
+                if (jsonData.content) {
+                  fullResponse += jsonData.content;
+                  // 实时更新UI
+                  // setContent(fullResponse);
+                  console.log("setMermaidCode", fullResponse);
+                  setMermaidCode(fullResponse);
+                  setMessages((prev) => {
+                    const prevMessages = [...prev];
+
+                    prevMessages[prevMessages.length - 1].message =
+                      fullResponse;
+                    return prevMessages;
+                  });
+                }
+                if (jsonData.diagram) {
+                  console.log("jsonData.diagram", jsonData.diagram);
+                  router.replace(`/chat/${jsonData.diagram.id}`);
+                }
+              } catch (e) {
+                // 忽略非JSON格式的行
+                continue;
+              }
+            }
+          }
+        }
+        console.log("init res", fullResponse);
+      }
+    };
+
+    init();
+  }, [queryDescription, queryProjectId]);
+
+  useEffect(() => {
+    const messages: MessageInfo<string>[] = [];
+    diagrams?.versions.forEach((version, index) => {
+      messages.push({
+        id: `local-${Date.now()}-${version.id}`,
+        message: version.description || diagrams.description,
+        status: "local",
+      });
+      messages.push({
+        id: `ai-${Date.now()}-${version.id}`,
+        message: version.mermaidCode,
+        status: "success",
+      });
+      if (index === diagrams?.versions.length - 1) {
+        setMermaidCode(version.mermaidCode);
+      }
+    });
+    if (diagrams?.id) {
+      setMessages(messages);
     }
-    onRequest(info.data.description as string);
-  };
-
-  const handleFileChange: GetProp<typeof Attachments, "onChange"> = (info) =>
-    setAttachedFiles(info.fileList);
+  }, [diagrams?.id]);
 
   // ==================== Nodes ====================
-  const placeholderNode = (
-    <Space direction="vertical" size={16} className={styles.placeholder}>
-      <Welcome
-        variant="borderless"
-        icon="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp"
-        title="Hello, I'm Ant Design X"
-        description="Base on Ant Design, AGI product interface solution, create a better intelligent vision~"
-        extra={
-          <Space>
-            <Button icon={<ShareAltOutlined />} />
-            <Button icon={<EllipsisOutlined />} />
-          </Space>
-        }
-      />
-      <Prompts
-        title="Do you want?"
-        items={placeholderPromptsItems}
-        styles={{
-          list: {
-            width: "100%",
-          },
-          item: {
-            flex: 1,
-          },
-        }}
-        onItemClick={onPromptsItemClick}
-      />
-    </Space>
-  );
 
   const items: GetProp<typeof Bubble.List, "items"> = messages.map(
     ({ id, message, status }) => ({
       key: id,
-      loading: status === "loading",
+      // loading: status === "loading",
       role: status === "local" ? "local" : "ai",
       content: message,
     })
   );
 
-  const attachmentsNode = (
-    <Badge dot={attachedFiles.length > 0 && !headerOpen}>
-      <Button
-        type="text"
-        icon={<PaperClipOutlined />}
-        onClick={() => setHeaderOpen(!headerOpen)}
-      />
-    </Badge>
-  );
-
-  const senderHeader = (
-    <Sender.Header
-      title="Attachments"
-      open={headerOpen}
-      onOpenChange={setHeaderOpen}
-      styles={{
-        content: {
-          padding: 0,
-        },
-      }}
-    >
-      <Attachments
-        beforeUpload={() => false}
-        items={attachedFiles}
-        onChange={handleFileChange}
-        placeholder={(type) =>
-          type === "drop"
-            ? { title: "Drop file here" }
-            : {
-                icon: <CloudUploadOutlined />,
-                title: "Upload files",
-                description: "Click or drag files to this area to upload",
-              }
-        }
-      />
-    </Sender.Header>
-  );
-
   const [isLoading, setIsLoading] = useState(false);
-
-  const { id } = useParams();
-  const { data: diagrams } = useGetDiagram(id as string);
-  console.log("diagrams", diagrams);
-  // const enhance = useEnhance();
-
-  // 第一步：增强用户描述
-  // const enhanceDescription = async (description: string) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await openaiApi.enhanceStream({ description });
-  //     const reader = response.body?.getReader();
-  //     if (!reader) throw new Error("No reader available");
-  //     let fullResponse = "";
-
-  //     while (true) {
-  //       const { done, value } = await reader.read();
-  //       if (done) break;
-
-  //       // 解析 SSE 格式数据
-  //       const text = new TextDecoder().decode(value);
-  //       const lines = text.split("\n");
-  //       for (const line of lines) {
-  //         if (line.startsWith("data: ")) {
-  //           try {
-  //             const jsonData = JSON.parse(line.slice(6));
-  //             if (jsonData.content) {
-  //               fullResponse += jsonData.content;
-  //               // 实时更新UI
-  //               setEnhancedDescription(fullResponse);
-  //               setContent(fullResponse);
-  //             }
-  //           } catch (e) {
-  //             // 忽略非JSON格式的行
-  //             continue;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return fullResponse;
-  //   } catch (error) {
-  //     console.error("增强描述失败:", error);
-  //     throw error;
-  //   }
-  // };
-
   // 第二步：生成 Mermaid DSL
-  const generateMermaidCode = async (description: string) => {
+  const generateMermaidCode = async (
+    description: string,
+    onUpdate: (mermaidCode: string) => void,
+    onSuccess: (mermaidCode: string) => void
+  ) => {
     try {
       setIsLoading(true);
+      const respons = await diagramsApi.createDiagramVersion(id as string, {
+        comment: description,
+      });
+      console.log("respons", respons);
       const response = await openaiApi.mermaidStream({ description });
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
@@ -418,6 +349,11 @@ const Independent: React.FC = () => {
                 fullResponse += jsonData.content;
                 // 实时更新UI
                 setMermaidCode(fullResponse);
+                onUpdate(fullResponse);
+                console.log("onupdate", fullResponse);
+              }
+              if (jsonData.version) {
+                onSuccess(jsonData.version.mermaidCode);
               }
             } catch (e) {
               // 忽略非JSON格式的行
@@ -438,41 +374,84 @@ const Independent: React.FC = () => {
 
   const { content, setContent, loading, setLoading, enhanceDescription } =
     useSender();
+
+  const { setRenameDiagramDialogOpen } = useDiagramsStore();
+  const handleRenameDiagram = () => {
+    setRenameDiagramDialogOpen(true, diagrams);
+  };
   // ==================== Render =================
   return (
-    <div className={styles.chat}>
-      {/* 🌟 消息列表 */}
-      <Bubble.List
-        items={
-          items.length > 0
-            ? items
-            : [{ content: placeholderNode, variant: "borderless" }]
-        }
-        roles={roles}
-        className={styles.messages}
-      />
-      {/* 🌟 提示词 */}
-      <Prompts items={senderPromptsItems} onItemClick={onPromptsItemClick} />
-      {/* 🌟 输入框 */}
-      {/* <Sender
-        value={content}
-        header={senderHeader}
-        onSubmit={onSubmit}
-        onChange={setContent}
-        prefix={attachmentsNode}
-        loading={agent.isRequesting()}
-        className={styles.sender}
-      /> */}
+    <>
+      {diagrams && (
+        <header className="px-4 flex justify-between items-center h-12">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/chat/projects`}>Projects</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/chat/projects/${diagrams?.projectId}`}>
+                    {diagrams?.project?.name}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <BreadcrumbPage
+                      onClick={handleRenameDiagram}
+                      className="hover:underline"
+                      style={{ cursor: "pointer" }}
+                    >
+                      {diagrams?.title}
+                    </BreadcrumbPage>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Rename Diagram</p>
+                  </TooltipContent>
+                </Tooltip>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+      )}
+      <div className={styles.chat}>
+        <div className="flex-1 contain-strict overflow-auto">
+          {/* 🌟 消息列表 */}
+          <Bubble.List
+            items={
+              items.length > 0
+                ? items
+                : [{ content: null, variant: "borderless" }]
+            }
+            roles={roles(user!)}
+            className={styles.messages}
+          />
+          {/* 🌟 提示词 */}
+          {/* <Prompts
+            items={senderPromptsItems}
+            onItemClick={onPromptsItemClick}
+          /> */}
+        </div>
 
-      <CustomSender
-        content={content}
-        onEnhance={() => enhanceDescription(content)}
-        onSubmit={() => onSubmit(content)}
-        setContent={setContent}
-        loading={loading}
-        setLoading={setLoading}
-      />
-    </div>
+        {/* 🌟 输入框 */}
+        <div>
+          <CustomSender
+            content={content}
+            onEnhance={() => enhanceDescription(content)}
+            onSubmit={() => onSubmit(content)}
+            setContent={setContent}
+            loading={loading}
+            setLoading={setLoading}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

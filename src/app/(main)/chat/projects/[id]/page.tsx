@@ -19,19 +19,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { useGetDiagramsByProjectId } from "@/hooks/use-diagrams";
+import {
+  useDeleteDiagram,
+  useGetDiagramsByProjectId,
+} from "@/hooks/use-diagrams";
 import { useSender } from "@/hooks/use-sender";
 import { diagramsApi } from "@/lib/api/diagrams";
 import { Project, projectsApi } from "@/lib/api/projects";
 import { MoreHorizontal, Shuffle } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/app";
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
+import { useDiagramsStore } from "@/store/diagrams";
 
 export default function ProjectDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const projectId = params.id;
 
   const [project, setProject] = useState<Project | null>(null);
@@ -55,16 +60,13 @@ export default function ProjectDetailPage() {
   console.log("diagrams", diagrams);
 
   const onSenderSubmit = async () => {
-    // setLoading(true);
-    console.log("onSenderSubmit", content);
-    const res = await diagramsApi.createDiagram({
-      title: "untitled",
-      projectId: projectId as string,
-      description: content,
-    });
-    console.log("res", res);
+    router.push(`/chat/new?pid=${projectId}&d=${content}`);
   };
   const { user } = useAppStore();
+
+  const { mutate: deleteDiagram } = useDeleteDiagram(projectId as string);
+
+  const { setRenameDiagramDialogOpen } = useDiagramsStore();
 
   return (
     <div className="h-screen flex flex-col">
@@ -86,15 +88,15 @@ export default function ProjectDetailPage() {
           </Breadcrumb>
         </header>
         <Separator />
-        <div className="px-4 py-4">
+        {/* <div className="px-4 py-4">
           <h1 className="font-medium">{project?.name}</h1>
           <p className="text-sm text-muted-foreground">
             {project?.description || "no description"}
           </p>
         </div>
-        <Separator />
+        <Separator /> */}
 
-        <div className="px-4 space-y-2 py-4">
+        <div className="px-2 space-y-2 py-4">
           <CustomSender
             content={content}
             onEnhance={() =>
@@ -111,17 +113,20 @@ export default function ProjectDetailPage() {
           {diagrams?.length ? (
             diagrams?.map((diagram) => (
               <Card
-                className="flex flex-col px-4 py-2 space-y-2"
+                className="flex flex-col px-4 py-2 space-y-2 "
                 key={diagram.id}
               >
-                <Link href={`/chat/${diagram.id}`}>
+                <Link
+                  href={`/chat/${diagram.id}`}
+                  className="flex flex-col gap-2"
+                >
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-zinc-200 rounded-lg">
+                    {/* <div className="p-2 bg-zinc-200 rounded-lg">
                       <Shuffle className="h-5 w-5 text-gray-400" />
-                    </div>
+                    </div> */}
                     <div className="flex-1 min-w-0">
                       <h2 className="text-lg font-medium">{diagram.title}</h2>
-                      <p className="text-gray-400 truncate">
+                      <p className="text-gray-400 truncate text-sm">
                         {/* 0 {project.chatCount} Chat{project.chatCount !== 1 && "s"} */}
                         {diagram.description}
                       </p>
@@ -146,10 +151,18 @@ export default function ProjectDetailPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.preventDefault();
+                            setRenameDiagramDialogOpen(true, diagram);
+                          }}
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            deleteDiagram(diagram.id);
                             //   deleteProject(project.id);
                           }}
                         >

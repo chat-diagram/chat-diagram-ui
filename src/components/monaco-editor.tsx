@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Editor, { OnMount } from "@monaco-editor/react";
+import Editor, { Monaco, OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { initEditor } from "@/lib/monacoExtra";
 
@@ -11,6 +11,7 @@ interface MonacoEditorProps {
   language?: string;
   theme?: "vs-dark" | "light";
   height?: string | number;
+  onMount: (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 }
 
 const MonacoEditor = ({
@@ -19,6 +20,7 @@ const MonacoEditor = ({
   language = "mermaid",
   theme = "vs-dark",
   height = "500px",
+  onMount,
 }: MonacoEditorProps) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
@@ -32,6 +34,9 @@ const MonacoEditor = ({
       tabSize: 2,
     });
     initEditor(monaco);
+    console.log("lei1");
+    onMount(editor, monaco);
+    console.log("lei2");
   };
 
   // 添加 useEffect 监听 value 变化

@@ -1,4 +1,5 @@
 import { request } from "../request";
+import { Project } from "./projects";
 
 export interface Diagram {
   id: string;
@@ -7,10 +8,21 @@ export interface Diagram {
   mermaidCode: string;
   currentVersion: number;
   userId: string;
+  project: Project;
   projectId: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  versions: DiagramVersion[];
+}
+export interface DiagramVersion {
+  id: string;
+  comment: string;
+  mermaidCode: string;
+  createdAt: string;
+  updatedAt: string;
+  versionNumber: number;
+  description: string;
 }
 
 export type GetDiagramListResponse = Diagram[];
@@ -18,8 +30,8 @@ export type GetDiagramListByProjectIdResponse = Diagram[];
 
 export type CreateDiagramRequest = Pick<
   Diagram,
-  "title" | "projectId" | "description"
->;
+  "projectId" | "description"
+> & { title?: string };
 
 export type CreateDiagramVersionRequest = {
   comment: string;
@@ -50,4 +62,6 @@ export const diagramsApi = {
     request.post(`/diagrams/${diagramId}/versions/${version}/rollback`),
   restoreDiagram: (diagramId: string) =>
     request.post(`/diagrams/${diagramId}/restore`),
+  renameDiagram: (diagramId: string, data: { title: string }) =>
+    request.post(`/diagrams/${diagramId}/title`, data),
 };

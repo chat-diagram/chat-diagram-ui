@@ -1,6 +1,6 @@
 "use client";
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import dayjs from "@/lib/utils/dayjs";
@@ -13,7 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useProjectsStore } from "@/store/projects";
-import { MoreHorizontal, Search, Shuffle } from "lucide-react";
+import {
+  ChartNoAxesGantt,
+  MoreHorizontal,
+  Search,
+  Shuffle,
+} from "lucide-react";
 import { Project, projectsApi } from "@/lib/api/projects";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -78,7 +83,8 @@ export default function ChatProjectsPage() {
               <Card key={project.id} className="p-3 space-y-2">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-zinc-200 rounded-lg">
-                    <Shuffle className="h-5 w-5 text-gray-400" />
+                    <ChartNoAxesGantt />
+                    {/* <Shuffle className="h-5 w-5 text-gray-400" /> */}
                   </div>
                   <div className="flex-1">
                     <h2 className="text-lg font-medium">{project.name}</h2>

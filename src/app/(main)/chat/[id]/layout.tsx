@@ -3,7 +3,13 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { createStyles } from "antd-style";
 import React, { createContext, useContext, useState } from "react";
 
-import { useParams } from "next/navigation";
+import {
+  notFound,
+  redirect,
+  useParams,
+  usePathname,
+  useSearchParams,
+} from "next/navigation";
 import LiveEditor from "./@live-editor/page";
 
 const useStyle = createStyles(({ token, css }) => {
@@ -16,7 +22,7 @@ const useStyle = createStyles(({ token, css }) => {
       border-radius: ${token.borderRadius}px;
       display: flex;
       background: ${token.colorBgContainer};
-      font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
+      // font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
 
       .ant-prompts {
         color: ${token.colorText};
@@ -97,6 +103,8 @@ interface ChatContextType {
   setEnhancedDescription: (desc: string) => void;
   showRightPanel: boolean;
   setShowRightPanel: (show: boolean) => void;
+  editorMounted: boolean;
+  setEditorMounted: (mounted: boolean) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -105,6 +113,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
   const [mermaidCode, setMermaidCode] = useState("");
   const [enhancedDescription, setEnhancedDescription] = useState("");
   const [showRightPanel, setShowRightPanel] = useState(true);
+  const [editorMounted, setEditorMounted] = useState(false);
 
   return (
     <ChatContext.Provider
@@ -115,6 +124,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setEnhancedDescription,
         showRightPanel,
         setShowRightPanel,
+        editorMounted,
+        setEditorMounted,
       }}
     >
       {children}
@@ -131,8 +142,13 @@ export function useChatContext() {
 }
 
 const Layout = ({ chat }: { chat: React.ReactNode }) => {
-  const { id } = useParams();
-  console.log("id", id);
+  const pathname = usePathname();
+  // 如果是 projects 路径，触发 404 处理，让 Next.js 继续匹配其他路由
+  if (pathname?.includes("/projects")) {
+    // redirect(pathname);
+  }
+  const params = useParams();
+  const { id } = params;
   const { showRightPanel, setShowRightPanel } = useChatContext();
 
   // ==================== Style ====================
@@ -168,7 +184,13 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
   return (
     <div className={styles.layout}>
       <PanelGroup direction="horizontal" className="w-full h-full">
-        <Panel minSize={30}>{chat}</Panel>
+        <Panel
+          minSize={30}
+          className="flex flex-col "
+          style={{ maxHeight: "100vh" }}
+        >
+          {chat}
+        </Panel>
         <PanelResizeHandleWithStyle
           onClick={() => {
             setShowRightPanel(!showRightPanel);

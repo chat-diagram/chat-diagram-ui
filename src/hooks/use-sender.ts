@@ -11,6 +11,7 @@ export const useSender = () => {
   ) => {
     try {
       setLoading(true);
+      if (description.length === 0) return;
       const response = await openaiApi.enhanceStream({ description });
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");

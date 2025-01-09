@@ -1,12 +1,11 @@
 "use client";
 import MonacoEditor from "@/components/monaco-editor";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mermaid from "mermaid";
 import { useEffect, useState } from "react";
 import { useChatContext } from "../layout";
 const LiveEditor = () => {
   const [activeTab, setActiveTab] = useState("preview");
-  const [code, setCode] = useState("");
   // 初始化 mermaid
   // 添加状态来存储 mermaid 图表内容
   const [mermaidContent, setMermaidContent] = useState("");
@@ -37,6 +36,7 @@ const LiveEditor = () => {
   };
 
   const handleCodeChange = (value: string) => {
+    console.log("handleCodeChange", value);
     setMermaidCode(value);
     renderMermaid(value);
   };
@@ -48,9 +48,35 @@ const LiveEditor = () => {
       theme: "default",
       securityLevel: "loose",
     });
+    console.log("mermaid初始化完成");
+
+    if (mermaidCode) {
+      renderMermaid(mermaidCode);
+    }
   }, []); // 空依赖数组确保只在挂载时执行一次
 
   const { mermaidCode, setMermaidCode } = useChatContext();
+  // useEffect(() => {
+  //   console.log("useEffect mermaidCode", mermaidCode);
+  // }, [mermaidCode]);
+  useEffect(() => {
+    console.log("useEffect mermaidContent", mermaidContent);
+    renderMermaid(mermaidCode);
+  }, [mermaidCode]);
+  const handleEditorDidMount = () =>
+    // editor: editor.IStandaloneCodeEditor,
+    // monaco: Monaco
+    {
+      console.log("编辑器挂载完毕，设置值", mermaidCode);
+      console.log("mermaidContent", mermaidContent);
+      if (mermaidCode) {
+        renderMermaid(mermaidCode);
+      }
+      // setMermaidCode(mermaidCode);
+      // renderMermaid(mermaidCode);
+    };
+  // };
+
   return (
     <div className="w-full flex flex-col h-screen">
       <div className="w-full p-1 border-b border-gray-200">
@@ -59,23 +85,6 @@ const LiveEditor = () => {
             <TabsTrigger value="preview">预览</TabsTrigger>
             <TabsTrigger value="code">代码</TabsTrigger>
           </TabsList>
-          {/* <TabsContent value="preview"></TabsContent>
-          <TabsContent value="code">
-            <div className="w-full h-full">
-              <textarea
-                className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none"
-                placeholder="在此输入 Mermaid 语法..."
-                onChange={(e) => {
-                  const code = e.target.value;
-                  // 重新渲染图表
-                  mermaid.render("mermaid-preview", code).then((result) => {
-                    document.getElementById("mermaid-preview")!.innerHTML =
-                      result.svg;
-                  });
-                }}
-              />
-            </div>
-          </TabsContent> */}
         </Tabs>
       </div>
       <div
@@ -87,6 +96,7 @@ const LiveEditor = () => {
           language="mermaid"
           theme="light"
           height="100%"
+          onMount={handleEditorDidMount}
         />
       </div>
       <div
@@ -107,7 +117,5 @@ const LiveEditor = () => {
     </div>
   );
 };
-
-// LiveEditor.displayName = "LiveEditor";
 
 export default LiveEditor;

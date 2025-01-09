@@ -42,7 +42,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const { data: projects = [], isLoading, error } = useGetProjects();
 
-  debugger;
   const data = {
     // user: {
     //   name: "shadcn",
@@ -188,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         />
         <NavMain items={data.navMain} />
         <NavProjects projects={projects} />
-        <NavConversations conversationsItems={conversationsItems} />
+        {/* <NavConversations conversationsItems={conversationsItems} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user!} />

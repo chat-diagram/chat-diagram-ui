@@ -26,7 +26,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { User } from "@/types/auth";
-import { Avatar } from "./Avatar";
+import { Avatar } from "./avatar";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -49,8 +49,8 @@ export function NavUser({ user }: { user: User }) {
               </Avatar> */}
               <Avatar name={user?.username || ""} size="sm" rounded={false} />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.username}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-semibold">{user?.username}</span>
+                <span className="truncate text-xs">{user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -69,8 +69,10 @@ export function NavUser({ user }: { user: User }) {
                 </Avatar> */}
                 <Avatar name={user?.username || ""} size="sm" rounded={false} />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-semibold">
+                    {user?.username}
+                  </span>
+                  <span className="truncate text-xs">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

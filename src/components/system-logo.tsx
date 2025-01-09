@@ -9,6 +9,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { LocalIcons } from "./local-icons";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function SystemLogo() {
   const {
@@ -20,18 +22,19 @@ export function SystemLogo() {
     setOpenMobile,
     toggleSidebar,
   } = useSidebar();
+  const router = useRouter();
   return (
-    <SidebarMenu>
+    <SidebarMenu style={{ minWidth: "32px" }}>
       <SidebarMenuItem>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 ">
-            <LocalIcons.SystemLogo />
+          <Link href="/" className="flex items-center gap-2 ">
+            <LocalIcons.SystemLogo className="w-8 h-8" />
             {open && (
               <span className="text-lg font-bold whitespace-nowrap">
                 chat-diagram
               </span>
             )}
-          </div>
+          </Link>
           {open && <SidebarTrigger className="-ml-1" />}
         </div>
       </SidebarMenuItem>
