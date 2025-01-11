@@ -1,6 +1,7 @@
 import { GalleryVerticalEnd } from "lucide-react";
 
 import { LoginForm } from "@/components/login-form";
+import { ICPRecord } from "@/components/icp-record";
 // import { LocalIcons } from "@/components/local-icons";
 
 export default function LoginPage() {
@@ -24,6 +25,7 @@ export default function LoginPage() {
       {/* <div className="relative hidden bg-muted lg:block">
         <LocalIcons.SystemLogo className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" />
       </div> */}
+      <ICPRecord className="mt-auto" />
     </div>
   );
 }

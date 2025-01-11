@@ -8,14 +8,14 @@ interface State {
 }
 
 interface Action {
-  setUser: (user: User) => void;
+  setUser: (user: User | null) => void;
 }
 
 export const useAppStore = create<State & Action>()(
   persist(
     (set) => ({
       user: null,
-      setUser: (user: User) => set({ user }),
+      setUser: (user: User | null) => set({ user }),
     }),
     {
       name: "app-storage",

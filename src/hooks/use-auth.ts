@@ -39,6 +39,24 @@ export function useSignup() {
   });
 }
 
+export function useLogout() {
+  const router = useRouter();
+  const { setUser } = useAppStore();
+
+  return useMutation({
+    mutationFn: async () => {
+      // 清除 token
+      localStorage.removeItem("token");
+      // 清除用户信息
+      setUser(null);
+      // 清除 react-query 缓存
+      queryClient.setQueryData(["user"], null);
+      // 跳转到登录页
+      router.push("/login");
+    },
+  });
+}
+
 export function useUser() {
   return useQuery({
     queryKey: ["user"],

@@ -34,7 +34,7 @@ export type CreateDiagramRequest = Pick<
 > & { title?: string };
 
 export type CreateDiagramVersionRequest = {
-  comment: string;
+  description: string;
 };
 
 export const diagramsApi = {

@@ -13,6 +13,9 @@ export const Avatar = ({
   className,
   rounded = true,
 }: AvatarProps) => {
+  if (name === "") {
+    return <div className="w-10 h-10 bg-muted rounded-full"></div>;
+  }
   const initials = name
     .split(" ")
     .map((word) => word[0])

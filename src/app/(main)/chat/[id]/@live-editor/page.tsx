@@ -14,7 +14,7 @@ const LiveEditor = () => {
   const [isError, setIsError] = useState(false);
 
   const renderMermaid = async (code: string) => {
-    if (!code.trim()) return;
+    // if (!code.trim()) return;
 
     try {
       // 先验证语法
@@ -34,8 +34,9 @@ const LiveEditor = () => {
   const handleCodeChange = (value: string) => {
     console.log("handleCodeChange", value);
     setMermaidCode(value);
-    renderMermaid(value);
+    // renderMermaid(value);
   };
+  const { mermaidCode, setMermaidCode } = useChatContext();
 
   useEffect(() => {
     // 在组件挂载后初始化 mermaid
@@ -51,7 +52,6 @@ const LiveEditor = () => {
     }
   }, []); // 空依赖数组确保只在挂载时执行一次
 
-  const { mermaidCode, setMermaidCode } = useChatContext();
   // useEffect(() => {
   //   console.log("useEffect mermaidCode", mermaidCode);
   // }, [mermaidCode]);

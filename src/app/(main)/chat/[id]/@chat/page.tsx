@@ -1,11 +1,9 @@
 "use client";
 import { Bubble, useXAgent, useXChat } from "@ant-design/x";
-import { createStyles } from "antd-style";
 import React, { useEffect, useState } from "react";
 
 import { Card, message, type GetProp } from "antd";
 import { useChatContext } from "../layout";
-import { openaiApi } from "@/lib/api/openai";
 import { CustomSender } from "@/components/sender";
 import { useSender } from "@/hooks/use-sender";
 import { useGetDiagram } from "@/hooks/use-diagrams";
@@ -32,107 +30,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useDiagramsStore } from "@/store/diagrams";
 import { queryClient } from "@/lib/request";
-
-const useStyle = createStyles(({ token, css }) => {
-  return {
-    layout: css`
-      width: 100%;
-      min-width: 1000px;
-      // height: 722px;
-      height: 100%;
-      border-radius: ${token.borderRadius}px;
-      display: flex;
-      background: ${token.colorBgContainer};
-      // font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
-
-      .ant-prompts {
-        color: ${token.colorText};
-      }
-    `,
-    menu: css`
-      background: ${token.colorBgLayout}80;
-      width: 280px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    `,
-    conversations: css`
-      padding: 0 12px;
-      flex: 1;
-      overflow-y: auto;
-    `,
-    chat: css`
-      // height: 100%;
-      flex: 1;
-      width: 100%;
-      max-width: 700px;
-      margin: 0 auto;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      padding: ${token.paddingLG}px;
-      gap: 16px;
-      justify-content: space-between;
-      min-height: 0;
-    `,
-    messages: css`
-      flex: 1;
-      shrink: 1;
-      min-height: 0;
-    `,
-    placeholder: css`
-      padding-top: 32px;
-    `,
-    sender: css`
-      box-shadow: ${token.boxShadow};
-    `,
-    logo: css`
-      display: flex;
-      height: 72px;
-      align-items: center;
-      justify-content: start;
-      padding: 0 24px;
-      box-sizing: border-box;
-
-      img {
-        width: 24px;
-        height: 24px;
-        display: inline-block;
-      }
-
-      span {
-        display: inline-block;
-        margin: 0 8px;
-        font-weight: bold;
-        color: ${token.colorText};
-        font-size: 16px;
-      }
-    `,
-    addBtn: css`
-      background: #1677ff0f;
-      border: 1px solid #1677ff34;
-      width: calc(100% - 24px);
-      margin: 0 12px 24px 12px;
-    `,
-    loadingDots: css`
-      display: inline-block;
-      &::after {
-        content: "...";
-        animation: dots 1.5s steps(4, end) infinite;
-        display: inline-block;
-        width: 0;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      @keyframes dots {
-        to {
-          width: 1.25em;
-        }
-      }
-    `,
-  };
-});
+import { useStyle } from "./styles";
+import { cn } from "@/lib/utils";
 
 const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
   user: User
@@ -191,7 +90,7 @@ const Independent: React.FC = () => {
   });
   console.log("messages", messages);
 
-  const { setShowRightPanel } = useChatContext();
+  const { showRightPanel, setShowRightPanel } = useChatContext();
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
@@ -209,9 +108,8 @@ const Independent: React.FC = () => {
   useEffect(() => {
     const init = async () => {
       if (queryDescription && queryProjectId) {
-        console.log("queryDescription", queryDescription);
-        console.log("queryProjectId", queryProjectId);
-        // setMessages([]);
+        // console.log("queryDescription", queryDescription);
+        // console.log("queryProjectId", queryProjectId);
         const messages: MessageInfo<string>[] = [];
         messages.push({
           id: `local-${Date.now()}-${queryProjectId}`,
@@ -221,8 +119,9 @@ const Independent: React.FC = () => {
         messages.push({
           id: `ai-${Date.now()}-${queryProjectId}`,
           message: JSON.stringify({
-            diagramId: "new",
+            versionId: "new",
             mermaidCode: "",
+            comment: "",
           }),
           status: "success",
         });
@@ -252,7 +151,6 @@ const Independent: React.FC = () => {
                   fullResponse += jsonData.content;
                   // 实时更新UI
                   // setContent(fullResponse);
-                  console.log("setMermaidCode", fullResponse);
                   setMermaidCode(fullResponse);
                   setMessages((prev) => {
                     const prevMessages = [...prev];
@@ -262,6 +160,7 @@ const Independent: React.FC = () => {
                       JSON.stringify({
                         diagramId: jsonData.diagram.id,
                         mermaidCode: fullResponse,
+                        comment: jsonData.comment,
                       });
                     // fullResponse;
 
@@ -290,16 +189,17 @@ const Independent: React.FC = () => {
     const messages: MessageInfo<string>[] = [];
     diagrams?.versions.forEach((version, index) => {
       messages.push({
-        id: `local-${Date.now()}-${version.id}`,
+        id: `local-${version.id}`,
         message: version.description || diagrams.description,
         status: "local",
       });
       messages.push({
-        id: `ai-${Date.now()}-${version.id}`,
+        id: `ai-${version.id}`,
         // message: version.mermaidCode,
         message: JSON.stringify({
-          diagramId: version.id,
+          versionId: version.id,
           mermaidCode: version.mermaidCode,
+          comment: version.comment,
         }),
         status: "success",
       });
@@ -320,25 +220,58 @@ const Independent: React.FC = () => {
   const messageRender = (message: string, status: MessageStatus) => {
     if (status !== "local") {
       try {
-        const { diagramId, mermaidCode } = JSON.parse(message);
+        const { versionId, mermaidCode, comment } = JSON.parse(message);
         return (
           <div style={{ marginBottom: 12 }}>
-            <Card
-              onClick={() => {
-                setIsShowDiagram(
-                  diagrams?.versions.find((one) => one.id === diagramId) || null
-                );
+            {/* <Card
+              styles={{
+                body: {
+                  padding: 0,
+                },
               }}
-              hoverable
-              className="hover:shadow-md"
+              className={cn(
+                "p-4 shadow-md transition-all",
+                "bg-muted rounded-r-2xl rounded-tl-2xl"
+              )}
+            >
+              <p className="text-sm">{comment}</p>
+            </Card> */}
+            <p style={{ marginBottom: 8 }}>{comment}</p>
+            <Card
+              styles={{
+                body: {
+                  padding: 16,
+                },
+              }}
+              onClick={() => {
+                console.log("versionId", versionId);
+                setIsShowDiagram(
+                  diagrams?.versions.find((one) => one.id === versionId) || {
+                    id: versionId,
+                    mermaidCode: mermaidCode,
+                    description: "",
+                    createdAt: "",
+                    updatedAt: "",
+                    versionNumber: 0,
+                    comment: comment,
+                  }
+                );
+                setMermaidCode(mermaidCode);
+                setShowRightPanel(true);
+              }}
+              // hoverable
+              // className="hover:shadow-md hover:border-blue-400"
               style={{
+                cursor: "pointer",
                 outline:
-                  isShowDiagram?.id === diagramId ? "1px solid #1677ff" : "",
+                  isShowDiagram?.id === versionId && showRightPanel
+                    ? "1px solid #1677ff"
+                    : "",
               }}
             >
               {/* {mermaidCode} */}
               <span className="text-sm text-gray-500">
-                {diagramId === "new" ? (
+                {versionId === "new" ? (
                   <div className="flex items-center">
                     Generating diagram
                     <div style={{ width: "2em" }}>
@@ -349,6 +282,9 @@ const Independent: React.FC = () => {
                   "Generated diagram"
                 )}
               </span>
+              {/* <div className="aspect-video w-full max-w-md bg-muted/30 rounded-lg flex items-center justify-center text-muted-foreground">
+                Generated Diagram Preview
+              </div> */}
             </Card>
           </div>
         );
@@ -356,7 +292,7 @@ const Independent: React.FC = () => {
         return <div>{message}</div>;
       }
     }
-    return message;
+    return <p style={{ lineHeight: "32px" }}>{message}</p>;
   };
   const items: GetProp<typeof Bubble.List, "items"> = messages.map(
     ({ id, message, status }) => ({
@@ -378,9 +314,8 @@ const Independent: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await diagramsApi.createDiagramVersion(id as string, {
-        comment: description,
+        description,
       });
-      // const response = await openaiApi.mermaidStream({ description });
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
       let fullResponse = "";
@@ -403,7 +338,7 @@ const Independent: React.FC = () => {
                 // onUpdate(fullResponse);
                 onUpdate(
                   JSON.stringify({
-                    diagramId: "new",
+                    versionId: "new",
                     mermaidCode: fullResponse,
                   })
                 );
@@ -417,20 +352,25 @@ const Independent: React.FC = () => {
 
                 onSuccess(
                   JSON.stringify({
-                    diagramId: jsonData.version.id,
+                    versionId: jsonData.version.id,
                     mermaidCode: jsonData.version.mermaidCode,
                   })
                 );
+                // 成功生成后把id从new设置为diagramid
                 setMessages((prev) => {
                   const prevMessages = [...prev];
-
-                  // todo
+                  diagrams?.versions.push(jsonData.version);
+                  prevMessages[
+                    prevMessages.length - 1
+                  ].id = `ai-${jsonData.version.id}`;
                   prevMessages[prevMessages.length - 1].message =
                     JSON.stringify({
-                      diagramId: jsonData.diagram.id,
+                      versionId: jsonData.version.id,
                       mermaidCode: jsonData.version.mermaidCode,
+                      comment: jsonData.version.comment,
                     });
-
+                  // prevMessages[prevMessages.length - 1].message =
+                  //   JSON.stringify(jsonData.version);
                   // fullResponse;
 
                   return prevMessages;
