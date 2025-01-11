@@ -31,7 +31,6 @@ import {
 import { useDiagramsStore } from "@/store/diagrams";
 import { queryClient } from "@/lib/request";
 import { useStyle } from "./styles";
-import { cn } from "@/lib/utils";
 
 const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
   user: User
@@ -58,6 +57,7 @@ const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
 });
 
 const Independent: React.FC = () => {
+  const [title, setTitle] = useState("");
   const { user } = useAppStore();
 
   const router = useRouter();
@@ -74,8 +74,6 @@ const Independent: React.FC = () => {
   const { styles } = useStyle();
 
   // ==================== State ====================
-
-  // ==================== Runtime ====================
 
   // ==================== Runtime ====================
   const [agent] = useXAgent({
@@ -101,6 +99,7 @@ const Independent: React.FC = () => {
 
   const queryProjectId = searchParams.get("pid");
   const queryDescription = searchParams.get("d");
+  const queryProjectTitle = searchParams.get("title");
   console.log("queryDescription", queryDescription);
   console.log("queryProjectId", queryProjectId);
 
@@ -108,8 +107,6 @@ const Independent: React.FC = () => {
   useEffect(() => {
     const init = async () => {
       if (queryDescription && queryProjectId) {
-        // console.log("queryDescription", queryDescription);
-        // console.log("queryProjectId", queryProjectId);
         const messages: MessageInfo<string>[] = [];
         messages.push({
           id: `local-${Date.now()}-${queryProjectId}`,
@@ -135,6 +132,7 @@ const Independent: React.FC = () => {
         const reader = response.body?.getReader();
         if (!reader) throw new Error("No reader available");
         let fullResponse = "";
+        let title = "";
 
         while (true) {
           const { done, value } = await reader.read();
@@ -147,6 +145,14 @@ const Independent: React.FC = () => {
             if (line.startsWith("data: ")) {
               try {
                 const jsonData = JSON.parse(line.slice(6));
+                console.log("jsonData.status", jsonData.status);
+
+                if (jsonData.status === "generating_title") {
+                  // todo 生成标题
+                  title += jsonData.content || "";
+                  setTitle(title);
+                  continue;
+                }
                 if (jsonData.content) {
                   fullResponse += jsonData.content;
                   // 实时更新UI
@@ -421,25 +427,31 @@ const Independent: React.FC = () => {
   // ==================== Render =================
   return (
     <>
-      {diagrams && (
-        <header className="px-4 flex justify-between items-center h-12">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href={`/chat/projects`}>Projects</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
+      <header className="px-4 flex justify-between items-center h-12">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={`/chat/projects`}>Projects</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                {queryProjectTitle ? (
+                  <span>{queryProjectTitle}</span>
+                ) : (
                   <Link href={`/chat/projects/${diagrams?.projectId}`}>
                     {diagrams?.project?.name}
                   </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
+                )}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              {queryProjectTitle ? (
+                <span>{title}</span>
+              ) : (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <BreadcrumbPage
@@ -454,11 +466,11 @@ const Independent: React.FC = () => {
                     <p>Rename Diagram</p>
                   </TooltipContent>
                 </Tooltip>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
-      )}
+              )}
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
       <div className={styles.chat}>
         {/* <div
           className="flex-1 contain-strict overflow-auto"
@@ -475,7 +487,6 @@ const Independent: React.FC = () => {
           roles={roles(user!)}
           className={styles.messages}
         />
-        {/* </div> */}
 
         {/* 🌟 输入框 */}
         <div>

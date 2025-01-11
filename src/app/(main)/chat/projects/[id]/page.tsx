@@ -60,7 +60,9 @@ export default function ProjectDetailPage() {
   console.log("diagrams", diagrams);
 
   const onSenderSubmit = async () => {
-    router.push(`/chat/new?pid=${projectId}&d=${content}`);
+    router.push(
+      `/chat/new?pid=${projectId}&d=${content}&title=${project?.name}`
+    );
   };
   const { user } = useAppStore();
 
@@ -110,6 +112,9 @@ export default function ProjectDetailPage() {
             loading={loading}
             setLoading={setLoading}
           />
+        </div>
+        <Separator />
+        <div className="px-4 space-y-2 py-4">
           {diagrams?.length ? (
             diagrams?.map((diagram) => (
               <Card
@@ -141,7 +146,8 @@ export default function ProjectDetailPage() {
                         {user?.username}
                       </span>
                       <span className="text-sm text-gray-400 whitespace-nowrap">
-                        Updated {dayjs(diagram.updatedAt).fromNow()}
+                        {/* Updated  */}
+                        {dayjs(diagram.updatedAt).fromNow()}
                       </span>
                     </div>
                     <DropdownMenu>
