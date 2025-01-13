@@ -46,11 +46,25 @@ export function useDeleteDiagram(projectId: string) {
   });
 }
 
+export function useRollbackDiagramVersion(diagramId: string) {
+  return useMutation({
+    mutationFn: (version: number) =>
+      diagramsApi.rollbackDiagramVersion(diagramId, version),
+    onSuccess: () => {
+      message.success("Diagram rolled back successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ["diagram", diagramId],
+      });
+    },
+  });
+}
+
 export function useRenameDiagram() {
   return useMutation({
     mutationFn: ({
       diagramId,
       data,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       projectId,
     }: {
       diagramId: string;

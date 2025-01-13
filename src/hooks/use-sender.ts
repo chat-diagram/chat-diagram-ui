@@ -24,6 +24,7 @@ export const useSender = () => {
         // 解析 SSE 格式数据
         const text = new TextDecoder().decode(value);
         const lines = text.split("\n");
+        console.log("enhang lines ", lines);
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             try {

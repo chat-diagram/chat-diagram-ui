@@ -31,6 +31,7 @@ import {
 import { useDiagramsStore } from "@/store/diagrams";
 import { queryClient } from "@/lib/request";
 import { useStyle } from "./styles";
+import { Badge } from "@/components/ui/badge";
 
 const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
   user: User
@@ -77,9 +78,14 @@ const Independent: React.FC = () => {
 
   // ==================== Runtime ====================
   const [agent] = useXAgent({
-    request: async ({ message }, { onUpdate, onSuccess }) => {
+    request: async ({ message }, { onUpdate, onSuccess, onError }) => {
       console.log("message", message);
-      await generateMermaidCode(message as string, onUpdate, onSuccess);
+      await generateMermaidCode(
+        message as string,
+        onUpdate,
+        onSuccess,
+        onError
+      );
     },
   });
 
@@ -133,19 +139,20 @@ const Independent: React.FC = () => {
         if (!reader) throw new Error("No reader available");
         let fullResponse = "";
         let title = "";
+        console.log("lei1");
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
           // 解析 SSE 格式数据
+
           const text = new TextDecoder().decode(value);
           const lines = text.split("\n");
           for (const line of lines) {
             if (line.startsWith("data: ")) {
               try {
                 const jsonData = JSON.parse(line.slice(6));
-                console.log("jsonData.status", jsonData.status);
 
                 if (jsonData.status === "generating_title") {
                   // todo 生成标题
@@ -175,9 +182,13 @@ const Independent: React.FC = () => {
                 }
                 if (jsonData.diagram) {
                   console.log("jsonData.diagram", jsonData.diagram);
+                  // queryClient.invalidateQueries({
+                  //   queryKey: ["diagram-project", jsonData.diagram.projectId],
+                  // });
                   router.replace(`/chat/${jsonData.diagram.id}`);
                 }
               } catch (e) {
+                console.log("error", e);
                 // 忽略非JSON格式的行
                 continue;
               }
@@ -206,12 +217,13 @@ const Independent: React.FC = () => {
           versionId: version.id,
           mermaidCode: version.mermaidCode,
           comment: version.comment,
+          versionNumber: version.versionNumber,
         }),
         status: "success",
       });
       if (index === diagrams?.versions.length - 1) {
         setMermaidCode(version.mermaidCode);
-        setIsShowDiagram(version);
+        setActiveDiagramVersion(version);
       }
     });
     if (diagrams?.id) {
@@ -220,15 +232,23 @@ const Independent: React.FC = () => {
   }, [diagrams?.id]);
 
   // ==================== Nodes ====================
-  const [isShowDiagram, setIsShowDiagram] = useState<DiagramVersion | null>(
-    null
-  );
+  // const [isShowDiagram, setIsShowDiagramOrigin] =
+  useState<DiagramVersion | null>(null);
+  const { setActiveDiagramVersion, activeDiagramVersion } = useChatContext();
+
+  // const setIsShowDiagram = (version: DiagramVersion | null) => {
+  //   setIsShowDiagramOrigin(version);
+  //   setActiveDiagramVersion(version);
+  //   // setActiveDiagramVersion(version?.id || null);
+  // };
+
   const messageRender = (message: string, status: MessageStatus) => {
     if (status !== "local") {
       try {
-        const { versionId, mermaidCode, comment } = JSON.parse(message);
+        const { versionId, mermaidCode, comment, versionNumber } =
+          JSON.parse(message);
         return (
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 12, lineHeight: "32px" }}>
             {/* <Card
               styles={{
                 body: {
@@ -250,8 +270,7 @@ const Independent: React.FC = () => {
                 },
               }}
               onClick={() => {
-                console.log("versionId", versionId);
-                setIsShowDiagram(
+                setActiveDiagramVersion(
                   diagrams?.versions.find((one) => one.id === versionId) || {
                     id: versionId,
                     mermaidCode: mermaidCode,
@@ -260,6 +279,7 @@ const Independent: React.FC = () => {
                     updatedAt: "",
                     versionNumber: 0,
                     comment: comment,
+                    diagramId: id as string,
                   }
                 );
                 setMermaidCode(mermaidCode);
@@ -270,7 +290,7 @@ const Independent: React.FC = () => {
               style={{
                 cursor: "pointer",
                 outline:
-                  isShowDiagram?.id === versionId && showRightPanel
+                  activeDiagramVersion?.id === versionId && showRightPanel
                     ? "1px solid #1677ff"
                     : "",
               }}
@@ -285,7 +305,12 @@ const Independent: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  "Generated diagram"
+                  <div className="flex items-center gap-2">
+                    <p>Generated diagram</p>
+                    <Badge variant="secondary" className="text-gray-500">
+                      v{versionNumber}
+                    </Badge>
+                  </div>
                 )}
               </span>
               {/* <div className="aspect-video w-full max-w-md bg-muted/30 rounded-lg flex items-center justify-center text-muted-foreground">
@@ -295,6 +320,7 @@ const Independent: React.FC = () => {
           </div>
         );
       } catch (e) {
+        console.log("message render error", e);
         return <div>{message}</div>;
       }
     }
@@ -315,7 +341,8 @@ const Independent: React.FC = () => {
   const generateMermaidCode = async (
     description: string,
     onUpdate: (mermaidCode: string) => void,
-    onSuccess: (mermaidCode: string) => void
+    onSuccess: (mermaidCode: string) => void,
+    onError: (error: Error) => void
   ) => {
     try {
       setIsLoading(true);
@@ -337,6 +364,11 @@ const Independent: React.FC = () => {
           if (line.startsWith("data: ")) {
             try {
               const jsonData = JSON.parse(line.slice(6));
+              if (jsonData.status === "error") {
+                message.error(jsonData.message);
+                onError(new Error("asd"));
+                break;
+              }
               if (jsonData.content) {
                 fullResponse += jsonData.content;
                 // 实时更新UI
@@ -349,17 +381,17 @@ const Independent: React.FC = () => {
                   })
                 );
               }
-              // todo 在流式数据的末尾拿到这次的version的id 但是目前拿不到
 
               if (jsonData.version) {
                 // onSuccess(jsonData.version.mermaidCode);
-                setIsShowDiagram(jsonData.version);
-                message.success("生成成功");
+                setActiveDiagramVersion(jsonData.version);
+                message.success("generated successfully");
 
                 onSuccess(
                   JSON.stringify({
                     versionId: jsonData.version.id,
                     mermaidCode: jsonData.version.mermaidCode,
+                    versionNumber: jsonData.version.versionNumber,
                   })
                 );
                 // 成功生成后把id从new设置为diagramid
@@ -373,6 +405,7 @@ const Independent: React.FC = () => {
                     JSON.stringify({
                       versionId: jsonData.version.id,
                       mermaidCode: jsonData.version.mermaidCode,
+                      versionNumber: jsonData.version.versionNumber,
                       comment: jsonData.version.comment,
                     });
                   // prevMessages[prevMessages.length - 1].message =
@@ -388,6 +421,7 @@ const Independent: React.FC = () => {
                 });
               }
             } catch (e) {
+              console.log("generateMermaidCode error", e);
               // 忽略非JSON格式的行
               continue;
             }
@@ -420,10 +454,6 @@ const Independent: React.FC = () => {
     setRenameDiagramDialogOpen(true, diagrams);
   };
 
-  // useEffect(() => {
-  //   // debugger;
-  //   setMermaidCode(isShowDiagram?.mermaidCode || "");
-  // }, [isShowDiagram?.id]);
   // ==================== Render =================
   return (
     <>

@@ -17,6 +17,7 @@ export interface Diagram {
 }
 export interface DiagramVersion {
   id: string;
+  diagramId: string;
   comment: string;
   mermaidCode: string;
   createdAt: string;

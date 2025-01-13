@@ -1,6 +1,6 @@
 "use client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { authApi } from "@/lib/api/auth";
+import { authApi, UserSubscription } from "@/lib/api/auth";
 // import type { LoginCredentials, SignupCredentials } from "@/types/auth";
 import { useRouter } from "next/navigation";
 import { queryClient } from "@/lib/request";
@@ -12,14 +12,40 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // 保存 token
       localStorage.setItem("token", data.token);
+
+      // 获取用户订阅信息
+      const subscription = await authApi.getUserSubscription();
+      data.user.subscription = subscription;
+
       // 更新缓存中的用户信息
       queryClient.setQueryData(["user"], data.user);
       setUser(data.user);
       // 跳转到首页
       router.push("/");
+      // 获取用户订阅信息
+    },
+  });
+}
+
+export function useUpdateSubscription() {
+  const { user, setUser, setShowUpgrade } = useAppStore();
+  return useMutation({
+    mutationFn: authApi.getUserSubscription,
+    onSuccess: (data) => {
+      if (user) {
+        user.subscription = data;
+        // todo 假数据
+        user.subscription.remainingVersions = 1000000;
+        user.subscription.isPro = true;
+        user.subscription.proExpiresAt = "2029-01-13";
+        setShowUpgrade(false);
+        //
+        queryClient.setQueryData(["user"], user);
+        setUser(user);
+      }
     },
   });
 }

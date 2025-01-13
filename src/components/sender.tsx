@@ -125,8 +125,8 @@ export const CustomSender = ({
           showUpgrade ? " flex-col right-0 left-0" : ""
         }`}
       >
-        {/* {showUpgrade && (
-          <div className="flex mb-2 items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm">
+        {showUpgrade && (
+          <div className="absolute w-full flex mb-2 items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-900">
                 Upgrade to Pro to unlock all features
@@ -139,10 +139,10 @@ export const CustomSender = ({
               <X className="h-4 w-4" />
             </button>
           </div>
-        )} */}
+        )}
         <Sender
           value={content}
-          header={headerNode}
+          // header={headerNode}
           onSubmit={onSubmit}
           onChange={setContent}
           prefix={enhanceNode}
@@ -168,6 +168,7 @@ export const CustomSender = ({
             width: "100%",
             borderRadius: "0.5rem",
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            marginTop: showUpgrade ? "35px" : "0",
           }}
           placeholder="Type your message here..."
         />

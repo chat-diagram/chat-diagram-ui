@@ -4,6 +4,18 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mermaid from "mermaid";
 import { useEffect, useState } from "react";
 import { useChatContext } from "../layout";
+import { ChevronsRight, Redo2, Undo2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { queryClient } from "@/lib/request";
+import { useParams } from "next/navigation";
+import { Diagram } from "@/lib/api/diagrams";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRollbackDiagramVersion } from "@/hooks/use-diagrams";
 const LiveEditor = () => {
   const [activeTab, setActiveTab] = useState("preview");
   // 初始化 mermaid
@@ -32,11 +44,45 @@ const LiveEditor = () => {
   };
 
   const handleCodeChange = (value: string) => {
-    console.log("handleCodeChange", value);
     setMermaidCode(value);
-    // renderMermaid(value);
   };
-  const { mermaidCode, setMermaidCode } = useChatContext();
+  const { id } = useParams();
+
+  const diagram = queryClient.getQueryData<Diagram>(["diagram", id]);
+  const versionLength = diagram?.versions.length;
+  console.log("diagram", diagram);
+  const {
+    mermaidCode,
+    setMermaidCode,
+    setShowRightPanel,
+    setActiveDiagramVersion,
+    activeDiagramVersion,
+  } = useChatContext();
+
+  const handlePreviousVersion = () => {
+    // if (activeDiagramVersion?.versionNumber) {
+    setActiveDiagramVersion(
+      diagram?.versions[activeDiagramVersion?.versionNumber - 2]
+    );
+    // }
+  };
+  const handleNextVersion = () => {
+    // if (activeDiagramVersion?.versionNumber) {
+    setActiveDiagramVersion(
+      diagram?.versions[activeDiagramVersion?.versionNumber]
+    );
+    // }
+  };
+  const { mutate: rollbackDiagramVersion } = useRollbackDiagramVersion(
+    activeDiagramVersion?.diagramId || ""
+  );
+
+  const handleRollbackDiagramVersion = () => {
+    console.log("handleRollbackDiagramVersion");
+    if (activeDiagramVersion) {
+      rollbackDiagramVersion(activeDiagramVersion?.versionNumber || 0);
+    }
+  };
 
   useEffect(() => {
     // 在组件挂载后初始化 mermaid
@@ -52,35 +98,87 @@ const LiveEditor = () => {
     }
   }, []); // 空依赖数组确保只在挂载时执行一次
 
-  // useEffect(() => {
-  //   console.log("useEffect mermaidCode", mermaidCode);
-  // }, [mermaidCode]);
   useEffect(() => {
     renderMermaid(mermaidCode);
   }, [mermaidCode]);
-  const handleEditorDidMount = () =>
-    // editor: editor.IStandaloneCodeEditor,
-    // monaco: Monaco
-    {
-      console.log("编辑器挂载完毕，设置值", mermaidCode);
-      console.log("mermaidContent", mermaidContent);
-      if (mermaidCode) {
-        renderMermaid(mermaidCode);
-      }
-      // setMermaidCode(mermaidCode);
-      // renderMermaid(mermaidCode);
-    };
-  // };
+  const handleEditorDidMount = () => {
+    if (mermaidCode) {
+      renderMermaid(mermaidCode);
+    }
+  };
 
   return (
     <div className="w-full flex flex-col h-screen">
-      <div className="w-full p-1 border-b border-gray-200">
+      <div className="w-full p-1 border-b border-gray-200 flex items-center gap-2">
+        <Button
+          size="mini"
+          variant="ghost"
+          onClick={() => setShowRightPanel(false)}
+        >
+          <ChevronsRight className="w-4 h-4" />
+        </Button>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="preview">预览</TabsTrigger>
             <TabsTrigger value="code">代码</TabsTrigger>
           </TabsList>
         </Tabs>
+        <div className="ml-auto flex gap-2">
+          {diagram?.currentVersion === activeDiagramVersion?.versionNumber ? (
+            <Badge variant="success" className="ml-4">
+              最新版本
+            </Badge>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  onClick={() => {
+                    handleRollbackDiagramVersion();
+                  }}
+                  variant="secondary"
+                  className="ml-4"
+                  style={{ cursor: "pointer" }}
+                >
+                  回滚到此版本
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>回滚到此版本，之后的版本会被删除</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="h5"
+                variant="ghost"
+                disabled={activeDiagramVersion?.versionNumber === 1}
+                onClick={handlePreviousVersion}
+              >
+                <Undo2 className="w-2 h-2" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>查看上一个版本</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="h5"
+                variant="ghost"
+                disabled={versionLength === activeDiagramVersion?.versionNumber}
+                onClick={handleNextVersion}
+              >
+                <Redo2 className="w-2 h-2" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>查看下一个版本</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
       <div
         className={`w-full h-full ${activeTab === "code" ? "block" : "hidden"}`}

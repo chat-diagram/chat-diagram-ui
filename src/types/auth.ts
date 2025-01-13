@@ -1,3 +1,5 @@
+import { UserSubscription } from "@/lib/api/auth";
+
 export interface LoginCredentials {
   username: string;
   password: string;
@@ -14,6 +16,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  subscription?: UserSubscription;
 }
 
 export interface AuthResponse {

@@ -4,6 +4,7 @@ import {
   Bell,
   ChevronsUpDown,
   CreditCard,
+  Crown,
   LogOut,
   Settings,
   Sparkles,
@@ -28,6 +29,9 @@ import {
 import { User } from "@/types/auth";
 import { Avatar } from "./avatar";
 import { useLogout } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { Badge } from "./ui/badge";
+import { ModeToggle } from "./toggle-mode";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -37,6 +41,10 @@ export function NavUser({ user }: { user: User }) {
   const handleLogout = () => {
     logout();
   };
+  const router = useRouter();
+  const isPro = user?.subscription?.isPro;
+
+  // const { user:userState } = useAppStore();
 
   return (
     <SidebarMenu>
@@ -56,7 +64,21 @@ export function NavUser({ user }: { user: User }) {
               </Avatar> */}
               <Avatar name={user?.username || ""} size="sm" rounded={false} />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user?.username}</span>
+                <div className="flex items-center gap-2">
+                  <span className="truncate font-semibold">
+                    {user?.username}
+                  </span>
+                  {isPro && (
+                    <Badge
+                      variant="secondary"
+                      className="h-4 gap-1 px-1 text-xs"
+                    >
+                      <Crown style={{ height: "0.75rem", width: "0.75rem" }} />
+                      <span> PRO</span>
+                    </Badge>
+                  )}
+                </div>
+
                 <span className="truncate text-xs">{user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -68,42 +90,66 @@ export function NavUser({ user }: { user: User }) {
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
+            {/* <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                {/* <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar> */}
+                
                 <Avatar name={user?.username || ""} size="sm" rounded={false} />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
                     {user?.username}
+                    
                   </span>
+
                   <span className="truncate text-xs">{user?.email}</span>
                 </div>
               </div>
-            </DropdownMenuLabel>
+            </DropdownMenuLabel> */}
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem
+                onClick={(e) => {
+                  if (isPro) {
+                    e.preventDefault();
+                    return;
+                  }
+                  router.push("/payment");
+                }}
+              >
+                {user?.subscription?.isPro ? <Crown /> : <Sparkles />}
+                {/* Upgrade to Pro */}
+                {user?.subscription?.isPro ? "Pro Member" : "Upgrade to Pro"}
+                {isPro && (
+                  <Badge variant="secondary" className="ml-auto">
+                    Active
+                  </Badge>
+                )}
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator /> */}
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Settings />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push("/payment/billings")}
+              >
                 <CreditCard />
                 Billing
+                {isPro && (
+                  <Badge variant="secondary" className="ml-auto">
+                    Pro
+                  </Badge>
+                )}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <Bell />
                 Notifications
-              </DropdownMenuItem>
+                <Badge variant="secondary" className="ml-auto">
+                  0
+                </Badge>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>

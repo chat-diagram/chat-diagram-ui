@@ -1,11 +1,15 @@
 "use client";
 
+import { useAppStore } from "@/store/app";
 import { Sender } from "@ant-design/x";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  const [showUpgrade, setShowUpgrade] = useState(true);
+  const { setShowUpgrade, showUpgrade } = useAppStore();
+
+  // const [showUpgrade, setShowUpgrade] = useState(!user?.subscription?.isPro);
+  redirect("/chat/projects");
 
   return (
     <div className="flex h-screen w-full items-center justify-center">

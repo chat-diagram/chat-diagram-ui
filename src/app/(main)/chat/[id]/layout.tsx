@@ -3,14 +3,9 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { createStyles } from "antd-style";
 import React, { createContext, useContext, useState } from "react";
 
-import {
-  notFound,
-  redirect,
-  useParams,
-  usePathname,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname } from "next/navigation";
 import LiveEditor from "./@live-editor/page";
+import { Diagram, DiagramVersion } from "@/lib/api/diagrams";
 
 const useStyle = createStyles(({ token, css }) => {
   return {
@@ -105,15 +100,45 @@ interface ChatContextType {
   setShowRightPanel: (show: boolean) => void;
   editorMounted: boolean;
   setEditorMounted: (mounted: boolean) => void;
+  activeDiagramVersion: DiagramVersion | null;
+  setActiveDiagramVersion: (version: DiagramVersion | null) => void;
+  diagram: Diagram | null;
+  setDiagram: (diagram: Diagram) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 // Provider 组件
 function ChatProvider({ children }: { children: React.ReactNode }) {
-  const [mermaidCode, setMermaidCode] = useState("");
+  const [mermaidCode, setMermaidCodeOrigin] = useState("");
   const [enhancedDescription, setEnhancedDescription] = useState("");
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [editorMounted, setEditorMounted] = useState(false);
+  const [activeDiagramVersion, setActiveDiagramVersion] = useState(null);
+  const [diagram, setDiagram] = useState<Diagram | null>(null);
+
+  const setMermaidCode = (code: string) => {
+    function filterMermaidComments(mermaidCode: string) {
+      /**
+       * 过滤掉第一行和最后一行的注释。
+       *
+       * @param {string} mermaidCode - 包含Mermaid代码的字符串
+       * @return {string} 过滤后的Mermaid代码
+       */
+      const lines = mermaidCode.split("\n");
+
+      // 检查并过滤第一行和最后一行的注释
+      if (lines.length > 0 && lines[0] === "```mermaid") {
+        lines.shift();
+      }
+      if (lines.length > 0 && lines[lines.length - 1] === "```") {
+        lines.pop();
+      }
+
+      return lines.join("\n");
+    }
+    const filteredCode = filterMermaidComments(code);
+    setMermaidCodeOrigin(filteredCode);
+  };
 
   return (
     <ChatContext.Provider
@@ -126,6 +151,10 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setShowRightPanel,
         editorMounted,
         setEditorMounted,
+        activeDiagramVersion,
+        setActiveDiagramVersion,
+        diagram,
+        setDiagram,
       }}
     >
       {children}
@@ -147,8 +176,8 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
   if (pathname?.includes("/projects")) {
     // redirect(pathname);
   }
-  const params = useParams();
-  const { id } = params;
+  // const params = useParams();
+  // const { id } = params;
   const { showRightPanel, setShowRightPanel } = useChatContext();
 
   // ==================== Style ====================
