@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bell,
   ChevronsUpDown,
   CreditCard,
   Crown,
@@ -10,7 +9,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,10 +26,108 @@ import {
 } from "@/components/ui/sidebar";
 import { User } from "@/types/auth";
 import { Avatar } from "./avatar";
-import { useLogout } from "@/hooks/use-auth";
+import { useDeleteUser, useLogout } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { Badge } from "./ui/badge";
-import { ModeToggle } from "./toggle-mode";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
+import { useAppStore } from "@/store/app";
+import Link from "next/link";
+
+const SettingDialog = ({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) => {
+  const [activeTab, setActiveTab] = useState("account");
+  const Item = ({
+    children,
+    right,
+  }: {
+    children: React.ReactNode;
+    right?: React.ReactNode;
+  }) => {
+    return (
+      <div className="flex items-center justify-between gap-2 p-2 text-sm  ">
+        <div>{children}</div>
+        <div>{right}</div>
+      </div>
+    );
+  };
+  const { user } = useAppStore();
+  const { mutate: deleteUser } = useDeleteUser();
+  const handleDeleteUser = () => {
+    if (!user?.id) {
+      return;
+    }
+    deleteUser(user?.id);
+  };
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogHeader></DialogHeader>
+      <DialogContent>
+        <DialogTitle>Settings</DialogTitle>
+        <Tabs
+          defaultValue="account"
+          className="w-full"
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
+          <TabsList muted className="flex w-full ">
+            <TabsTrigger value="common" className="flex-1">
+              通用设置
+            </TabsTrigger>
+            <TabsTrigger value="account" className="flex-1">
+              账户信息
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {activeTab === "account" && (
+          <div className="px-0">
+            <Item right={user?.email}>电子邮件</Item>
+            <Separator />
+            <Item
+              right={
+                user?.subscription?.isPro ? (
+                  // "Pro"
+                  <Badge variant="secondary" className="h-4 gap-1 px-1 text-sm">
+                    <Crown style={{ height: "1rem", width: "1rem" }} />
+                    <span> PRO</span>
+                  </Badge>
+                ) : (
+                  <Button variant="outline" size="sm">
+                    <Link href="/payment">升级Pro</Link>
+                  </Button>
+                )
+              }
+            >
+              订阅
+            </Item>
+            <Separator />
+            <Item
+              right={
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteUser}
+                >
+                  注销
+                </Button>
+              }
+            >
+              注销账号
+            </Item>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -44,7 +140,7 @@ export function NavUser({ user }: { user: User }) {
   const router = useRouter();
   const isPro = user?.subscription?.isPro;
 
-  // const { user:userState } = useAppStore();
+  const [settingDialogOpen, setSettingDialogOpen] = useState(false);
 
   return (
     <SidebarMenu>
@@ -78,7 +174,6 @@ export function NavUser({ user }: { user: User }) {
                     </Badge>
                   )}
                 </div>
-
                 <span className="truncate text-xs">{user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -128,7 +223,7 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuGroup>
             {/* <DropdownMenuSeparator /> */}
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSettingDialogOpen(true)}>
                 <Settings />
                 Settings
               </DropdownMenuItem>
@@ -158,6 +253,11 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <SettingDialog
+          open={settingDialogOpen}
+          onOpenChange={setSettingDialogOpen}
+        />
       </SidebarMenuItem>
     </SidebarMenu>
   );

@@ -1,9 +1,10 @@
-import { CloudUploadOutlined, PaperClipOutlined } from "@ant-design/icons";
 import { Attachments, Sender } from "@ant-design/x";
-import { message, Badge, Button, GetProp } from "antd";
+import { Badge, Button, GetProp } from "antd";
 import { Sparkles, X } from "lucide-react";
 import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import Link from "next/link";
+import { Button as CustomButtom } from "./ui/button";
 
 export const CustomSender = ({
   content,
@@ -20,64 +21,11 @@ export const CustomSender = ({
   setLoading: (loading: boolean) => void;
   onEnhance: () => void;
 }) => {
-  const handleFileChange: GetProp<typeof Attachments, "onChange"> = (info) =>
-    setAttachedFiles(info.fileList);
   const [headerOpen, setHeaderOpen] = React.useState(false);
 
   const [attachedFiles, setAttachedFiles] = React.useState<
     GetProp<typeof Attachments, "items">
   >([]);
-  const senderHeader1 = (
-    <Sender.Header
-      title="Attachments"
-      open={headerOpen}
-      onOpenChange={setHeaderOpen}
-      styles={{
-        content: {
-          padding: 0,
-        },
-      }}
-    >
-      <Attachments
-        beforeUpload={() => false}
-        items={attachedFiles}
-        onChange={handleFileChange}
-        placeholder={(type) =>
-          type === "drop"
-            ? { title: "Drop file here" }
-            : {
-                icon: <CloudUploadOutlined />,
-                title: "Upload files",
-                description: "Click or drag files to this area to upload",
-              }
-        }
-      />
-    </Sender.Header>
-  );
-  const senderHeader = (
-    <div className="flex items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-gray-900">
-          Upgrade to Pro to unlock all features
-        </span>
-      </div>
-      <button
-        className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-        onClick={() => setShowUpgrade(false)}
-      >
-        <X className="h-4 w-4" />
-      </button>
-    </div>
-  );
-  const attachmentsNode = (
-    <Badge dot={attachedFiles.length > 0 && !headerOpen}>
-      <Button
-        type="text"
-        icon={<PaperClipOutlined />}
-        onClick={() => setHeaderOpen(!headerOpen)}
-      />
-    </Badge>
-  );
   const [showUpgrade, setShowUpgrade] = React.useState(true);
   {
     /* <div className="flex items-center justify-center w-[14px] h-[22px]">
@@ -102,21 +50,21 @@ export const CustomSender = ({
       </Tooltip>
     </Badge>
   );
-  const [recording, setRecording] = React.useState(false);
+  // const [recording, setRecording] = React.useState(false);
 
-  const headerNode = (
-    <Sender.Header
-      open={showUpgrade}
-      title={
-        <div className="px-2">
-          <span className="text-sm font-medium text-gray-900 ">
-            Upgrade to Pro to unlock all features
-          </span>
-        </div>
-      }
-      onOpenChange={setShowUpgrade}
-    />
-  );
+  // const headerNode = (
+  //   <Sender.Header
+  //     open={showUpgrade}
+  //     title={
+  //       <div className="px-2">
+  //         <span className="text-sm font-medium text-gray-900 ">
+  //           Upgrade to Pro to unlock all features
+  //         </span>
+  //       </div>
+  //     }
+  //     onOpenChange={setShowUpgrade}
+  //   />
+  // );
 
   return (
     <div className="relative flex flex-col gap-4">
@@ -126,18 +74,31 @@ export const CustomSender = ({
         }`}
       >
         {showUpgrade && (
-          <div className="absolute w-full flex mb-2 items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm">
+          <div
+            className="absolute w-full flex mb-2 items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm"
+            style={{ paddingTop: "0px", minHeight: "40px" }}
+          >
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-900">
                 Upgrade to Pro to unlock all features
               </span>
             </div>
-            <button
-              className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-              onClick={() => setShowUpgrade(false)}
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/payment"
+                className="text-sm font-medium text-gray-900"
+              >
+                <CustomButtom variant="link" size="sm">
+                  Upgrade
+                </CustomButtom>
+              </Link>
+              <button
+                className="rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                onClick={() => setShowUpgrade(false)}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
         <Sender
@@ -168,7 +129,7 @@ export const CustomSender = ({
             width: "100%",
             borderRadius: "0.5rem",
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-            marginTop: showUpgrade ? "35px" : "0",
+            marginTop: showUpgrade ? "26px" : "0",
           }}
           placeholder="Type your message here..."
         />

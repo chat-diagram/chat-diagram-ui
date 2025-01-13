@@ -38,6 +38,7 @@ export const useStyle = createStyles(({ token, css }) => {
       display: flex;
       flex-direction: column;
       padding: ${token.paddingLG}px;
+      padding-top: 0;
       // gap: 16px;
       justify-content: space-between;
       min-height: 0;

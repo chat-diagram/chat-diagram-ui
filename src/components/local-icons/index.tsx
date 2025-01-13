@@ -2,13 +2,24 @@ import Image from "next/image";
 import logo from "./logo.png";
 
 export const LocalIcons = {
-  SystemLogo: ({ className }: { className: string }) => (
+  SystemLogo: ({
+    className,
+    width,
+    height,
+    style,
+  }: {
+    className?: string;
+    width?: number;
+    height?: number;
+    style?: React.CSSProperties;
+  }) => (
     <Image
-      width={32}
-      height={32}
+      width={width || 32}
+      height={height || 32}
       src={logo.src}
       alt="logo"
       className={className}
+      style={style}
     />
   ),
 };

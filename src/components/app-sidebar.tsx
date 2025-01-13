@@ -1,20 +1,7 @@
 "use client";
 import * as React from "react";
 import { nanoid } from "nanoid";
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  File,
-  FolderClosed,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+import { FolderClosed, Frame, Map, PieChart } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
@@ -27,8 +14,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { NavConversations } from "./nav-conversations";
-import { NavAddConversation } from "./nav-add-conversation";
 import { usePathname } from "next/navigation";
 import { useProjectsStore } from "@/store/projects";
 import { useAppStore } from "@/store/app";

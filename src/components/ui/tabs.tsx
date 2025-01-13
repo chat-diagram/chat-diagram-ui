@@ -9,13 +9,16 @@ const Tabs = TabsPrimitive.Root;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    muted?: boolean;
+  }
+>(({ className, muted, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-9 items-center justify-center rounded-lg  p-1 text-muted-foreground",
-      className
+      "inline-flex h-9 items-center justify-center rounded-lg p-1 text-muted-foreground",
+      className,
+      muted && "bg-muted"
     )}
     {...props}
   />

@@ -86,8 +86,11 @@ export function NavProjects({ projects }: { projects: Project[] }) {
                   <span>Share Project</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => deleteProject(item.id)}>
-                  <Trash2 className="text-muted-foreground" />
+                <DropdownMenuItem
+                  onClick={() => deleteProject(item.id)}
+                  className="text-red-500 focus:bg-red-100 focus:text-red-500"
+                >
+                  <Trash2 />
                   <span>Delete Project</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -104,12 +107,6 @@ export function NavProjects({ projects }: { projects: Project[] }) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         )}
-        {/* <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   );

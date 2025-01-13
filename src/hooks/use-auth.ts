@@ -1,10 +1,11 @@
 "use client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { authApi, UserSubscription } from "@/lib/api/auth";
+import { authApi } from "@/lib/api/auth";
 // import type { LoginCredentials, SignupCredentials } from "@/types/auth";
 import { useRouter } from "next/navigation";
 import { queryClient } from "@/lib/request";
 import { useAppStore } from "@/store/app";
+import { message } from "antd";
 
 export function useLogin() {
   const router = useRouter();
@@ -88,5 +89,16 @@ export function useUser() {
     queryKey: ["user"],
     // 由于数据已经在 cache 中,不需要 queryFn
     enabled: false,
+  });
+}
+
+export function useDeleteUser() {
+  const logout = useLogout();
+  return useMutation({
+    mutationFn: authApi.deleteUser,
+    onSuccess: () => {
+      message.success("deleted user successfully");
+      logout.mutate();
+    },
   });
 }

@@ -40,7 +40,19 @@ const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
     placement: "start",
     // typing: { step: 5, interval: 20 },
     avatar: {
-      icon: <LocalIcons.SystemLogo className="w-4 h-4" />,
+      icon: (
+        <LocalIcons.SystemLogo
+          width={26}
+          height={26}
+          style={{ objectFit: "none" }}
+        />
+      ),
+      style: {
+        backgroundColor: "#fff",
+        border: "none",
+        borderRadius: 0,
+        objectFit: "none",
+      },
     },
     styles: {
       content: {
@@ -291,7 +303,7 @@ const Independent: React.FC = () => {
                 cursor: "pointer",
                 outline:
                   activeDiagramVersion?.id === versionId && showRightPanel
-                    ? "1px solid #1677ff"
+                    ? "1px solid #AAA"
                     : "",
               }}
             >

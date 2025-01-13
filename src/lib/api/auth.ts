@@ -21,6 +21,7 @@ export const authApi = {
 
   signup: (credentials: SignupCredentials) =>
     request.post<AuthResponse>("/users/register", credentials),
+  deleteUser: (id: string) => request.delete(`/users/${id}`),
   getUserSubscription: () =>
     request.get<UserSubscription>("/users/subscription"),
   upgradeSubscription: (data: { durationInDays: number }) =>

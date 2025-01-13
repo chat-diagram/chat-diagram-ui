@@ -40,6 +40,11 @@ export default function ChatProjectsPage() {
   //   };
 
   const { data: projects = [], isLoading, error } = useGetProjects();
+  const [search, setSearch] = useState("");
+
+  const filteredProjects = projects.filter((project) =>
+    project.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const { mutate: deleteProject } = useDeleteProject();
 
@@ -60,6 +65,8 @@ export default function ChatProjectsPage() {
         <div className="flex items-center gap-0 px-4 h-[50px]">
           <Search size={16} />
           <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="border-0 rounded-none outline-none focus-visible:ring-0 shadow-none"
             placeholder="Search your projects"
           ></Input>
@@ -82,7 +89,7 @@ export default function ChatProjectsPage() {
 
       <div className="overflow-y-auto gap-4 py-4 w-full flex-col flex flex-1 z-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-4 px-4 w-full mx-auto">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <Link href={`/chat/projects/${project.id}`} key={project.id}>
               <Card key={project.id} className="p-3 space-y-2">
                 <div className="flex items-center space-x-3">
@@ -122,6 +129,7 @@ export default function ChatProjectsPage() {
                           e.preventDefault();
                           deleteProject(project.id);
                         }}
+                        className="text-red-500 focus:bg-red-100 focus:text-red-500"
                       >
                         Delete
                       </DropdownMenuItem>
@@ -133,67 +141,6 @@ export default function ChatProjectsPage() {
           ))}
         </div>
       </div>
-      {/* <Dialog
-        open={addProjectDialogOpen}
-        onOpenChange={onAddProjectDialogOpenChange}
-      >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create a new project</DialogTitle>
-          </DialogHeader>
-          <Form {...addProjectForm}>
-            <form
-              onSubmit={addProjectForm.handleSubmit(handleAddProjectSubmit)}
-              className="space-y-6"
-            >
-              <FormField
-                control={addProjectForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Name <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="This is a project name"
-                        {...field}
-                      ></Input>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-              <FormField
-                control={addProjectForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="This is a description"
-                        {...field}
-                      ></Input>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
-
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setAddProjectDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Create</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog> */}
     </div>
   );
 }

@@ -171,6 +171,7 @@ export default function ProjectDetailPage() {
                             deleteDiagram(diagram.id);
                             //   deleteProject(project.id);
                           }}
+                          className="text-red-500 focus:bg-red-100 focus:text-red-500"
                         >
                           Delete
                         </DropdownMenuItem>
