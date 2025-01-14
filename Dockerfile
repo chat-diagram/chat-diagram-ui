@@ -4,6 +4,10 @@ FROM node:20-alpine AS builder
 # 设置工作目录
 WORKDIR /app
 
+# 设置淘宝 npm 镜像源
+RUN npm config set registry https://registry.npmmirror.com
+
+
 # 安装 pnpm
 RUN npm install -g pnpm
 
@@ -29,6 +33,7 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 ENV NODE_ENV production
+ENV PORT 3001
 
 # 复制构建产物和必要文件
 COPY --from=builder /app/.next/standalone ./
@@ -36,7 +41,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
 # 暴露端口
-EXPOSE 3000
+EXPOSE 3001
 
 # 启动应用
 CMD ["node", "server.js"] 
