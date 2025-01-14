@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRollbackDiagramVersion } from "@/hooks/use-diagrams";
+import { useTheme } from "next-themes";
 const LiveEditor = () => {
   const [activeTab, setActiveTab] = useState("preview");
   // 初始化 mermaid
@@ -84,11 +85,13 @@ const LiveEditor = () => {
     }
   };
 
+  const { theme: nextTheme } = useTheme();
+
   useEffect(() => {
     // 在组件挂载后初始化 mermaid
     mermaid.initialize({
       startOnLoad: true,
-      theme: "default",
+      theme: nextTheme === "dark" ? "dark" : "default",
       securityLevel: "loose",
     });
     console.log("mermaid初始化完成");
@@ -96,7 +99,7 @@ const LiveEditor = () => {
     if (mermaidCode) {
       renderMermaid(mermaidCode);
     }
-  }, []); // 空依赖数组确保只在挂载时执行一次
+  }, [nextTheme]); // 空依赖数组确保只在挂载时执行一次
 
   useEffect(() => {
     renderMermaid(mermaidCode);
@@ -108,8 +111,8 @@ const LiveEditor = () => {
   };
 
   return (
-    <div className="w-full flex flex-col h-screen">
-      <div className="w-full p-1 border-b border-gray-200 flex items-center gap-2">
+    <div className="flex flex-col h-screen" style={{ minWidth: "400px" }}>
+      <div className="w-full p-1 border-b  flex items-center gap-2">
         <Button
           size="mini"
           variant="ghost"

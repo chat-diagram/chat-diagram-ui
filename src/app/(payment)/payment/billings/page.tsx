@@ -70,9 +70,9 @@ const orders: Order[] = [
 
 function EmptyState() {
   return (
-    <div className="text-center py-12">
+    <div className="text-center py-12 bg-background">
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-        <Receipt className="w-8 h-8 text-gray-400" />
+        <Receipt className="w-8 h-8 text-gray-400 dark:text-gray-600" />
       </div>
       <h3 className="text-lg font-medium mb-2">暂无账单记录</h3>
       <p className="text-gray-500 mb-6">
@@ -88,20 +88,21 @@ function EmptyState() {
 export default function BillingHistory() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const isPro = useAppStore((state) => state.user?.subscription?.isPro);
-
   if (!isPro) {
     orders.length = 0;
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-4">
         <div>
           <h1 className="text-3xl font-bold mb-2">账单记录</h1>
-          <p className="text-gray-500">查看您的所有交易记录和订单详情</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            查看您的所有交易记录和订单详情
+          </p>
         </div>
 
-        <Card className="p-6 bg-white shadow-lg rounded-2xl">
+        <Card className="p-6 bg-background shadow-lg rounded-2xl">
           {orders.length > 0 ? (
             <Table>
               <TableHeader>
@@ -140,7 +141,7 @@ export default function BillingHistory() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-gray-500 hover:text-black"
+                            className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white"
                             onClick={() => setSelectedOrder(order)}
                           >
                             详情 <ChevronDown className="ml-1 h-4 w-4" />
@@ -195,7 +196,7 @@ export default function BillingHistory() {
           )}
         </Card>
 
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
           <p>如果您有任何问题或需要帮助，请联系我们的客户支持团队。</p>
           {/* todo */}
           <p>邮箱: xxxxx@chatdiagram.com | 电话: xxxxx</p>

@@ -88,7 +88,7 @@ export function NavProjects({ projects }: { projects: Project[] }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => deleteProject(item.id)}
-                  className="text-red-500 focus:bg-red-100 focus:text-red-500"
+                  className="text-red-500 focus:bg-red-100 focus:text-red-500  "
                 >
                   <Trash2 />
                   <span>Delete Project</span>

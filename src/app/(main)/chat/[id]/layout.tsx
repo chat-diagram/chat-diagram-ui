@@ -16,11 +16,11 @@ const useStyle = createStyles(({ token, css }) => {
       height: 100%;
       border-radius: ${token.borderRadius}px;
       display: flex;
-      background: ${token.colorBgContainer};
+      // background: ${token.colorBgContainer};
       // font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
 
       .ant-prompts {
-        color: ${token.colorText};
+        // color: ${token.colorText};
       }
     `,
     menu: css`
@@ -53,7 +53,7 @@ const useStyle = createStyles(({ token, css }) => {
       padding-top: 32px;
     `,
     sender: css`
-      box-shadow: ${token.boxShadow};
+      // box-shadow: ${token.boxShadow};
     `,
     logo: css`
       display: flex;
@@ -86,6 +86,8 @@ const useStyle = createStyles(({ token, css }) => {
     ResizeHandleOuter: css`
       outline: none;
       background: rgba(0, 0, 0, 0.1) !important;
+      // background:
+      background: hsl(var(--border)) !important;
     `,
   };
 });
@@ -243,7 +245,7 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
         <PanelResizeHandleWithStyle /> */}
 
         {showRightPanel && (
-          <Panel minSize={30}>
+          <Panel minSize={30} style={{ minWidth: "400px" }}>
             <LiveEditor />
           </Panel>
         )}

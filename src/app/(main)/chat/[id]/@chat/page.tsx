@@ -48,7 +48,7 @@ const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
         />
       ),
       style: {
-        backgroundColor: "#fff",
+        backgroundColor: "transparent",
         border: "none",
         borderRadius: 0,
         objectFit: "none",
@@ -274,13 +274,16 @@ const Independent: React.FC = () => {
             >
               <p className="text-sm">{comment}</p>
             </Card> */}
-            <p style={{ marginBottom: 8 }}>{comment}</p>
+            <p style={{ marginBottom: 8 }} className="text-foreground">
+              {comment}
+            </p>
             <Card
               styles={{
                 body: {
                   padding: 16,
                 },
               }}
+              className="bg-muted/50 border-muted"
               onClick={() => {
                 setActiveDiagramVersion(
                   diagrams?.versions.find((one) => one.id === versionId) || {
@@ -308,7 +311,7 @@ const Independent: React.FC = () => {
               }}
             >
               {/* {mermaidCode} */}
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {versionId === "new" ? (
                   <div className="flex items-center">
                     Generating diagram
@@ -336,7 +339,11 @@ const Independent: React.FC = () => {
         return <div>{message}</div>;
       }
     }
-    return <p style={{ lineHeight: "32px" }}>{message}</p>;
+    return (
+      <p style={{ lineHeight: "32px" }} className="text-foreground">
+        {message}
+      </p>
+    );
   };
   const items: GetProp<typeof Bubble.List, "items"> = messages.map(
     ({ id, message, status }) => ({
@@ -527,7 +534,7 @@ const Independent: React.FC = () => {
               : [{ content: null, variant: "borderless" }]
           }
           roles={roles(user!)}
-          className={styles.messages}
+          className={`${styles.messages} scrollbar`}
         />
 
         {/* 🌟 输入框 */}

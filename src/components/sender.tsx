@@ -75,11 +75,11 @@ export const CustomSender = ({
       >
         {showUpgrade && (
           <div
-            className="absolute w-full flex mb-2 items-center justify-between rounded-lg border bg-gray-50 py-2 px-4 shadow-sm"
+            className="absolute w-full flex mb-2 items-center justify-between rounded-lg  bg-gray-50 py-2 px-4 shadow-sm dark:bg-gray-900"
             style={{ paddingTop: "0px", minHeight: "40px" }}
           >
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium ">
                 Upgrade to Pro to unlock all features
               </span>
             </div>
@@ -125,13 +125,16 @@ export const CustomSender = ({
           //         }
           //   }
           style={{
-            backgroundColor: "white",
             width: "100%",
             borderRadius: "0.5rem",
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
             marginTop: showUpgrade ? "26px" : "0",
           }}
+          classNames={{
+            input: "placeholder:text-gray-400 dark:text-white",
+          }}
           placeholder="Type your message here..."
+          className="bg-background border-border "
         />
       </div>
     </div>

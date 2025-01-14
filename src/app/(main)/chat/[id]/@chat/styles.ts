@@ -37,8 +37,7 @@ export const useStyle = createStyles(({ token, css }) => {
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      padding: ${token.paddingLG}px;
-      padding-top: 0;
+      padding-left: ${token.paddingLG}px;
       // gap: 16px;
       justify-content: space-between;
       min-height: 0;
@@ -52,7 +51,9 @@ export const useStyle = createStyles(({ token, css }) => {
       padding-top: 32px;
     `,
     sender: css`
-      box-shadow: ${token.boxShadow};
+      padding: ${token.paddingLG}px;
+      padding-left: 0;
+      padding-top: 0;
     `,
     logo: css`
       display: flex;

@@ -93,7 +93,7 @@ export default function ChatProjectsPage() {
             <Link href={`/chat/projects/${project.id}`} key={project.id}>
               <Card key={project.id} className="p-3 space-y-2">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-zinc-200 rounded-lg">
+                  <div className="p-2 bg-zinc-200 rounded-lg dark:bg-zinc-800">
                     <ChartNoAxesGantt />
                     {/* <Shuffle className="h-5 w-5 text-gray-400" /> */}
                   </div>

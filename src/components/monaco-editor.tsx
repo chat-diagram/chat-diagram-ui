@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Editor, { Monaco, OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { initEditor } from "@/lib/monacoExtra";
+import { useTheme } from "next-themes";
 
 interface MonacoEditorProps {
   value?: string;
@@ -22,7 +23,16 @@ const MonacoEditor = ({
   height = "500px",
   onMount,
 }: MonacoEditorProps) => {
+  const { theme: nextTheme } = useTheme();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
+  // 添加新的 useEffect 来处理主题切换
+  useEffect(() => {
+    if (editorRef.current) {
+      const currentTheme = nextTheme === "dark" ? "vs-dark" : "light";
+      editorRef.current.updateOptions({ theme: currentTheme });
+    }
+  }, [nextTheme]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;

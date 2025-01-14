@@ -36,6 +36,7 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { useAppStore } from "@/store/app";
 import Link from "next/link";
+import { ModeToggle } from "./toggle-mode";
 
 const SettingDialog = ({
   open,
@@ -245,6 +246,24 @@ export function NavUser({ user }: { user: User }) {
                   0
                 </Badge>
               </DropdownMenuItem> */}
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              {/* <DropdownMenuLabel> */}
+              <div className="py-1">
+                <span className="text-xs ml-2 text-foreground/70 ">
+                  Preferences
+                </span>
+              </div>
+              <div className="py-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2 text-sm ml-2">
+                    <span>Theme</span>
+                  </div>
+                  <ModeToggle />
+                </div>
+              </div>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>

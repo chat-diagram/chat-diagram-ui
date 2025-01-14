@@ -1,40 +1,45 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
-export function ModeToggle() {
-  const { setTheme } = useTheme();
+export function ModeToggle({ className }: { className?: string }) {
+  const { theme, setTheme } = useTheme();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Tabs
+      defaultValue={theme}
+      onValueChange={(value) => {
+        console.log(value);
+        setTheme(value);
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <TabsList muted>
+        <TabsTrigger value="light">
+          <Sun
+            data-mode={theme === "dark" ? "light" : "dark"}
+            className=" rotate-0 scale-100 transition-all dark:-rotate-90"
+            size={16}
+          />
+        </TabsTrigger>
+        <TabsTrigger value="dark">
+          <Moon
+            data-mode={theme === "dark" ? "light" : "dark"}
+            className="rotate-90  transition-all dark:rotate-0 ease-in-out"
+            size={16}
+          />
+        </TabsTrigger>
+        <TabsTrigger value="system">
+          <Laptop size={16} />
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 }
