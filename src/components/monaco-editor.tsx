@@ -42,6 +42,7 @@ const MonacoEditor = ({
       scrollBeyondLastLine: false,
       fontSize: 14,
       tabSize: 2,
+      theme: nextTheme === "dark" ? "vs-dark" : "light",
     });
     initEditor(monaco);
     console.log("lei1");
