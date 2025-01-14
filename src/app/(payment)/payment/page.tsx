@@ -51,7 +51,8 @@ export default function Payment() {
     //   method: "alipay",
     //   durationInDays: selectedDuration * 30,
     // });
-    const res = await true;
+    // const res =
+    await true;
     updateSubscription();
 
     // const res = await true;

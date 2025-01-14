@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import { nanoid } from "nanoid";
 import { FolderClosed, Frame, Map, PieChart } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -25,7 +24,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setAddProjectDialogOpen } = useProjectsStore();
   const { user } = useAppStore();
 
-  const { data: projects = [], isLoading, error } = useGetProjects();
+  const { data: projects = [] } = useGetProjects();
 
   const data = {
     // user: {
@@ -139,25 +138,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
   };
 
-  const defaultConversationsItems = [
-    {
-      key: nanoid(),
-      label: "New Conversation",
-    },
-  ];
-  const [conversationsItems, setConversationsItems] = React.useState(
-    defaultConversationsItems
-  );
+  // const defaultConversationsItems = [
+  //   {
+  //     key: nanoid(),
+  //     label: "New Conversation",
+  //   },
+  // ];
+  // const [conversationsItems, setConversationsItems] = React.useState(
+  //   defaultConversationsItems
+  // );
 
-  const handleAddConversation = () => {
-    setConversationsItems([
-      ...conversationsItems,
-      {
-        key: nanoid(),
-        label: `New Conversation ${conversationsItems.length}`,
-      },
-    ]);
-  };
+  // const handleAddConversation = () => {
+  //   setConversationsItems([
+  //     ...conversationsItems,
+  //     {
+  //       key: nanoid(),
+  //       label: `New Conversation ${conversationsItems.length}`,
+  //     },
+  //   ]);
+  // };
 
   return (
     <Sidebar collapsible="icon" {...props}>

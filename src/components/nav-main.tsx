@@ -1,41 +1,15 @@
 "use client";
 
-import {
-  ChevronRight,
-  Folder,
-  Forward,
-  MoreHorizontal,
-  Plus,
-  Trash2,
-  type LucideIcon,
-} from "lucide-react";
+import { Plus, type LucideIcon } from "lucide-react";
 
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
-import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function NavMain({
@@ -54,7 +28,7 @@ export function NavMain({
     }[];
   }[];
 }) {
-  const isMobile = useIsMobile();
+  // const isMobile = useIsMobile();
 
   return (
     <SidebarGroup>

@@ -43,7 +43,7 @@ export const RenameDiagramDialog = () => {
     if (renameDiagramInfo) {
       renameDiagramForm.setValue("name", renameDiagramInfo.title);
     }
-  }, [renameDiagramInfo]);
+  }, [renameDiagramInfo, renameDiagramForm]);
   const onRenameDiagramDialogOpenChange = (open: boolean) => {
     if (!open) {
       renameDiagramForm.reset();

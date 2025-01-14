@@ -12,15 +12,7 @@ import { LocalIcons } from "./local-icons";
 import Link from "next/link";
 
 export function SystemLogo() {
-  const {
-    isMobile,
-    state,
-    open,
-    setOpen,
-    openMobile,
-    setOpenMobile,
-    toggleSidebar,
-  } = useSidebar();
+  const { open } = useSidebar();
   return (
     <SidebarMenu style={{ minWidth: "32px" }}>
       <SidebarMenuItem>

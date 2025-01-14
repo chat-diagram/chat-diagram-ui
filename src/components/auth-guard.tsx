@@ -2,14 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAppStore } from "@/store/app";
 
 const publicPaths = ["/login", "/signup"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAppStore();
 
   useEffect(() => {
     const token = localStorage.getItem("token");

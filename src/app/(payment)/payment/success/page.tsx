@@ -1,19 +1,14 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Link from "next/link";
 
-interface PaymentSuccessProps {
-  orderNumber?: string;
-  amount?: number;
-  membershipDuration?: number;
-}
+export default function PaymentSuccess() {
+  const orderNumber = "20240113001";
+  const amount = 130.0;
+  const membershipDuration = 12;
 
-export default function PaymentSuccess({
-  orderNumber = "20240113001",
-  amount = 130.0,
-  membershipDuration = 12,
-}: PaymentSuccessProps) {
   return (
     <div className="min-h-screen bg-background p-6 flex items-center justify-center">
       <div className="max-w-md w-full space-y-8">

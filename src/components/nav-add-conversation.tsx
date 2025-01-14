@@ -1,33 +1,12 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { createStyles } from "antd-style";
-import {
-  Attachments,
-  Bubble,
-  Conversations,
-  Prompts,
-  Sender,
-  Welcome,
-  useXAgent,
-  useXChat,
-} from "@ant-design/x";
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, GetProp } from "antd";
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "./ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
-import { ChevronRight } from "lucide-react";
 
 export function NavAddConversation({
   //   conversationsItems,
@@ -116,57 +95,52 @@ export function NavAddConversation({
   });
   const { styles } = useStyle();
 
-  const defaultConversationsItems = [
-    {
-      key: "0",
-      label: "What is Ant Design X?",
-    },
-  ];
+  // const defaultConversationsItems = [
+  //   {
+  //     key: "0",
+  //     label: "What is Ant Design X?",
+  //   },
+  // ];
 
   // ==================== State ====================
-  const [headerOpen, setHeaderOpen] = React.useState(false);
 
-  const [content, setContent] = React.useState("");
+  // const [content, setContent] = React.useState("");
 
   //   const [conversationsItems, setConversationsItems] = React.useState(
   //     defaultConversationsItems
   //   );
 
-  const [activeKey, setActiveKey] = React.useState(
-    defaultConversationsItems[0].key
-  );
-
-  const [attachedFiles, setAttachedFiles] = React.useState<
-    GetProp<typeof Attachments, "items">
-  >([]);
+  // const [activeKey, setActiveKey] = React.useState(
+  //   defaultConversationsItems[0].key
+  // );
 
   // ==================== Runtime ====================
-  const [agent] = useXAgent({
-    request: async ({ message }, { onSuccess }) => {
-      onSuccess(`Mock success return. You said: ${message}`);
-    },
-  });
+  // const [agent] = useXAgent({
+  //   request: async ({ message }, { onSuccess }) => {
+  //     onSuccess(`Mock success return. You said: ${message}`);
+  //   },
+  // });
 
-  const { onRequest, messages, setMessages } = useXChat({
-    agent,
-  });
+  // const { onRequest, messages, setMessages } = useXChat({
+  //   agent,
+  // });
 
-  useEffect(() => {
-    if (activeKey !== undefined) {
-      setMessages([]);
-    }
-  }, [activeKey]);
+  // useEffect(() => {
+  //   if (activeKey !== undefined) {
+  //     setMessages([]);
+  //   }
+  // }, [activeKey]);
 
   // ==================== Event ====================
-  const onSubmit = (nextContent: string) => {
-    if (!nextContent) return;
-    onRequest(nextContent);
-    setContent("");
-  };
+  // const onSubmit = (nextContent: string) => {
+  //   if (!nextContent) return;
+  //   onRequest(nextContent);
+  //   setContent("");
+  // };
 
-  const onPromptsItemClick: GetProp<typeof Prompts, "onItemClick"> = (info) => {
-    onRequest(info.data.description as string);
-  };
+  // const onPromptsItemClick: GetProp<typeof Prompts, "onItemClick"> = (info) => {
+  //   onRequest(info.data.description as string);
+  // };
 
   // const onAddConversation = () => {
   //   setConversationsItems([
@@ -179,14 +153,11 @@ export function NavAddConversation({
   //   setActiveKey(`${conversationsItems.length}`);
   // };
 
-  const onConversationClick: GetProp<typeof Conversations, "onActiveChange"> = (
-    key
-  ) => {
-    setActiveKey(key);
-  };
-
-  const handleFileChange: GetProp<typeof Attachments, "onChange"> = (info) =>
-    setAttachedFiles(info.fileList);
+  // const onConversationClick: GetProp<typeof Conversations, "onActiveChange"> = (
+  //   key
+  // ) => {
+  //   setActiveKey(key);
+  // };
 
   return (
     <div>

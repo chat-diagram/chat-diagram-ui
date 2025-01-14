@@ -12,7 +12,7 @@ export const useSender = () => {
     try {
       setLoading(true);
       if (description.length === 0) return;
-      const response = await openaiApi.enhanceStream({ description });
+      const response: any = await openaiApi.enhanceStream({ description });
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
       let fullResponse = "";
@@ -36,6 +36,7 @@ export const useSender = () => {
                 onUpdate(fullResponse);
               }
             } catch (e) {
+              console.log("enhanceDescription error", e);
               // 忽略非JSON格式的行
               continue;
             }

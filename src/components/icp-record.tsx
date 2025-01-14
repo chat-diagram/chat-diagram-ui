@@ -10,7 +10,7 @@ interface ICPRecordProps {
 
 export function ICPRecord({
   icpNo = "沪ICP备16042764号-2", // 替换为你的实际备案号
-  psb = "沪ICP备16042764号-2", // 替换为你的实际公安备案号
+  // psb = "沪ICP备16042764号-2", // 替换为你的实际公安备案号
   className,
 }: ICPRecordProps) {
   return (

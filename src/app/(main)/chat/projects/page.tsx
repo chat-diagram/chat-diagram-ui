@@ -20,11 +20,11 @@ import { useAppStore } from "@/store/app";
 import { useDeleteProject, useGetProjects } from "@/hooks/use-projects";
 
 export default function ChatProjectsPage() {
-  const { addProjectDialogOpen, setAddProjectDialogOpen } = useProjectsStore();
+  const { setAddProjectDialogOpen } = useProjectsStore();
   const { user } = useAppStore();
 
   //   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   // 新增获取projects的函数
   //   const fetchProjects = async () => {
@@ -39,7 +39,7 @@ export default function ChatProjectsPage() {
   //     }
   //   };
 
-  const { data: projects = [], isLoading, error } = useGetProjects();
+  const { data: projects = [] } = useGetProjects();
   const [search, setSearch] = useState("");
 
   const filteredProjects = projects.filter((project) =>

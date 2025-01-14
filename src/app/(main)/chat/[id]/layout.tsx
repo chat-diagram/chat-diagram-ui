@@ -4,7 +4,6 @@ import { createStyles } from "antd-style";
 import React, { createContext, useContext, useState } from "react";
 
 import { usePathname } from "next/navigation";
-import LiveEditor from "./@live-editor/page";
 import { Diagram, DiagramVersion } from "@/lib/api/diagrams";
 
 const useStyle = createStyles(({ token, css }) => {
@@ -172,7 +171,13 @@ export function useChatContext() {
   return context;
 }
 
-const Layout = ({ chat }: { chat: React.ReactNode }) => {
+const Layout = ({
+  chat,
+  liveEditor,
+}: {
+  chat: React.ReactNode;
+  liveEditor: React.ReactNode;
+}) => {
   const pathname = usePathname();
   // 如果是 projects 路径，触发 404 处理，让 Next.js 继续匹配其他路由
   if (pathname?.includes("/projects")) {
@@ -246,7 +251,7 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
 
         {showRightPanel && (
           <Panel minSize={30} style={{ minWidth: "400px" }}>
-            <LiveEditor />
+            {liveEditor}
           </Panel>
         )}
       </PanelGroup>
@@ -254,10 +259,16 @@ const Layout = ({ chat }: { chat: React.ReactNode }) => {
   );
 };
 
-const LayoutWithProvider = ({ chat }: { chat: React.ReactNode }) => {
+const LayoutWithProvider = ({
+  chat,
+  liveeditor: liveEditor,
+}: {
+  chat: React.ReactNode;
+  liveeditor: React.ReactNode;
+}) => {
   return (
     <ChatProvider>
-      <Layout chat={chat} />
+      <Layout chat={chat} liveEditor={liveEditor} />
     </ChatProvider>
   );
 };

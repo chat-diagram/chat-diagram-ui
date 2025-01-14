@@ -11,7 +11,6 @@ import { z } from "zod";
 import { useProjectsStore } from "@/store/projects";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { projectsApi } from "@/lib/api/projects";
 import {
   Form,
   FormControl,

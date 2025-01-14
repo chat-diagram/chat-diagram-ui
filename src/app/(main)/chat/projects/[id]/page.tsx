@@ -24,12 +24,11 @@ import {
   useGetDiagramsByProjectId,
 } from "@/hooks/use-diagrams";
 import { useSender } from "@/hooks/use-sender";
-import { diagramsApi } from "@/lib/api/diagrams";
 import { Project, projectsApi } from "@/lib/api/projects";
-import { MoreHorizontal, Shuffle } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppStore } from "@/store/app";
 import { Avatar } from "@/components/avatar";
 import { useDiagramsStore } from "@/store/diagrams";
@@ -41,17 +40,21 @@ export default function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
 
-  const getProject = async () => {
+  const getProject = useCallback(async () => {
     if (!projectId) {
       return;
     }
-    const project = await projectsApi.getProject(projectId as string);
-    setProject(project);
-  };
+    try {
+      const project = await projectsApi.getProject(projectId as string);
+      setProject(project);
+    } catch (error) {
+      console.error("Failed to fetch project:", error);
+    }
+  }, [projectId]); // projectId 作为依赖项
 
   useEffect(() => {
     getProject();
-  }, [projectId]);
+  }, [getProject]);
 
   const { content, setContent, loading, setLoading, enhanceDescription } =
     useSender();

@@ -142,7 +142,7 @@ const Independent: React.FC = () => {
         });
         setMessages(messages);
 
-        const response = await diagramsApi.createDiagram({
+        const response: any = await diagramsApi.createDiagram({
           projectId: queryProjectId as string,
           description: queryDescription as string,
         });
@@ -355,7 +355,6 @@ const Independent: React.FC = () => {
     })
   );
 
-  const [isLoading, setIsLoading] = useState(false);
   // 第二步：生成 Mermaid DSL
   const generateMermaidCode = async (
     description: string,
@@ -364,10 +363,12 @@ const Independent: React.FC = () => {
     onError: (error: Error) => void
   ) => {
     try {
-      setIsLoading(true);
-      const response = await diagramsApi.createDiagramVersion(id as string, {
-        description,
-      });
+      const response: any = await diagramsApi.createDiagramVersion(
+        id as string,
+        {
+          description,
+        }
+      );
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
       let fullResponse = "";
@@ -459,11 +460,11 @@ const Independent: React.FC = () => {
       console.error("生成 Mermaid 代码失败:", error);
       throw error;
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
-  const { setMermaidCode, setEnhancedDescription } = useChatContext();
+  const { setMermaidCode } = useChatContext();
 
   const { content, setContent, loading, setLoading, enhanceDescription } =
     useSender();

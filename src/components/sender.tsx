@@ -1,5 +1,5 @@
-import { Attachments, Sender } from "@ant-design/x";
-import { Badge, Button, GetProp } from "antd";
+import { Sender } from "@ant-design/x";
+import { Badge, Button } from "antd";
 import { Sparkles, X } from "lucide-react";
 import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -21,11 +21,6 @@ export const CustomSender = ({
   setLoading: (loading: boolean) => void;
   onEnhance: () => void;
 }) => {
-  const [headerOpen, setHeaderOpen] = React.useState(false);
-
-  const [attachedFiles, setAttachedFiles] = React.useState<
-    GetProp<typeof Attachments, "items">
-  >([]);
   const [showUpgrade, setShowUpgrade] = React.useState(true);
   {
     /* <div className="flex items-center justify-center w-[14px] h-[22px]">
@@ -33,7 +28,7 @@ export const CustomSender = ({
       </div> */
   }
   const enhanceNode = (
-    <Badge dot={attachedFiles.length > 0 && !headerOpen}>
+    <Badge dot={false}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
-export function ModeToggle({ className }: { className?: string }) {
+export function ModeToggle({}) {
   const { theme, setTheme } = useTheme();
 
   return (

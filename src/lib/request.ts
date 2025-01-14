@@ -28,8 +28,8 @@ type ApiResponse<T = unknown> = T & { statusCode: number; message: string };
 export const request = {
   async fetch<T>(
     endpoint: string,
-    config: RequestInit,
-    onStream?: (data: T) => void
+    config: RequestInit
+    // onStream?: (data: T) => void
   ): Promise<T> {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...config,

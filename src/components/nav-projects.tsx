@@ -2,13 +2,10 @@
 
 import {
   ChartNoAxesGantt,
-  Circle,
   Folder,
   Forward,
-  Icon,
   MoreHorizontal,
   Trash2,
-  type LucideIcon,
 } from "lucide-react";
 
 import {
@@ -27,7 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useDeleteProject, useGetProjects } from "@/hooks/use-projects";
+import { useDeleteProject } from "@/hooks/use-projects";
 import { Project } from "@/lib/api/projects";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
