@@ -13,7 +13,6 @@ export function ModeToggle({}) {
     <Tabs
       defaultValue={theme}
       onValueChange={(value) => {
-        console.log(value);
         setTheme(value);
       }}
       onClick={(e) => {
@@ -24,14 +23,16 @@ export function ModeToggle({}) {
       <TabsList muted>
         <TabsTrigger value="light">
           <Sun
-            data-mode={theme === "dark" ? "light" : "dark"}
+            // data-mode={theme === "dark" ? "light" : "dark"}
+            data-mode={theme}
             className=" rotate-0 scale-100 transition-all dark:-rotate-90"
             size={16}
           />
         </TabsTrigger>
         <TabsTrigger value="dark">
           <Moon
-            data-mode={theme === "dark" ? "light" : "dark"}
+            // data-mode={theme === "dark" ? "light" : "dark"}
+            data-mode={theme}
             className="rotate-90  transition-all dark:rotate-0 ease-in-out"
             size={16}
           />

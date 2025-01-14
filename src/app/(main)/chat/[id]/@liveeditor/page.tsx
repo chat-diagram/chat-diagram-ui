@@ -88,18 +88,62 @@ const LiveEditor = () => {
   const { theme: nextTheme } = useTheme();
 
   useEffect(() => {
+    let finalTheme = nextTheme;
+    const updateTheme = () => {
+      if (nextTheme === "system") {
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          finalTheme = "dark";
+        } else {
+          finalTheme = "default";
+        }
+      } else {
+        finalTheme = nextTheme === "dark" ? "dark" : "default";
+      }
+    };
     // 在组件挂载后初始化 mermaid
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: nextTheme === "dark" ? "dark" : "default",
-      securityLevel: "loose",
-    });
-    console.log("mermaid初始化完成");
+    const init = () => {
+      updateTheme();
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: "loose",
+        theme: finalTheme,
+      });
 
-    if (mermaidCode) {
-      renderMermaid(mermaidCode);
-    }
-  }, [nextTheme]); // 空依赖数组确保只在挂载时执行一次
+      console.log("mermaid初始化完成");
+
+      if (mermaidCode) {
+        renderMermaid(mermaidCode);
+      }
+    };
+
+    init();
+    // 创建媒体查询监听器
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const themeChangeHandler = async () => {
+      // init();
+      // mermaid.updateSiteConfig({
+      //   theme: finalTheme,
+      // });
+      updateTheme();
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: "loose",
+        theme: finalTheme,
+      });
+      // todo 这里获取不到mermaidCode，不知道为什么  render才能把theme的变化也应用上
+      if (mermaidCode) {
+        renderMermaid(mermaidCode);
+      }
+    };
+
+    // 添加系统主题变化的监听
+    mediaQuery.addEventListener("change", themeChangeHandler);
+
+    // 清理函数
+    return () => {
+      mediaQuery.removeEventListener("change", themeChangeHandler);
+    };
+  }, [nextTheme, mermaidCode]);
 
   useEffect(() => {
     renderMermaid(mermaidCode);

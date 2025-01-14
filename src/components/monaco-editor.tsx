@@ -28,10 +28,38 @@ const MonacoEditor = ({
 
   // 添加新的 useEffect 来处理主题切换
   useEffect(() => {
-    if (editorRef.current) {
-      const currentTheme = nextTheme === "dark" ? "vs-dark" : "light";
-      editorRef.current.updateOptions({ theme: currentTheme });
-    }
+    let finalTheme = nextTheme;
+
+    const updateTheme = () => {
+      if (nextTheme === "system") {
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          finalTheme = "vs-dark";
+        } else {
+          finalTheme = "light";
+        }
+      } else {
+        finalTheme = nextTheme === "dark" ? "vs-dark" : "light";
+      }
+
+      if (editorRef.current) {
+        editorRef.current.updateOptions({ theme: finalTheme });
+      }
+    };
+
+    // 初始化主题
+    updateTheme();
+
+    // 创建媒体查询监听器
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const themeChangeHandler = () => updateTheme();
+
+    // 添加系统主题变化的监听
+    mediaQuery.addEventListener("change", themeChangeHandler);
+
+    // 清理函数
+    return () => {
+      mediaQuery.removeEventListener("change", themeChangeHandler);
+    };
   }, [nextTheme]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
@@ -45,9 +73,7 @@ const MonacoEditor = ({
       theme: nextTheme === "dark" ? "vs-dark" : "light",
     });
     initEditor(monaco);
-    console.log("lei1");
     onMount(editor, monaco);
-    console.log("lei2");
   };
 
   // 添加 useEffect 监听 value 变化
