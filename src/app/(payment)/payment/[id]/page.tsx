@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useUpdateSubscription } from "@/hooks/use-auth";
 import { Payment, paymentApi } from "@/lib/api/payment";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,9 +11,9 @@ import { useEffect, useState } from "react";
 export default function PaymentStatus() {
   const paymentId = useParams().id;
   const [newPayment, setNewPayment] = useState<Payment | null>(null);
-  const [step, setStep] = useState<"redirect" | "confirm" | "success">(
-    "confirm"
-  );
+  const [step, setStep] = useState<
+    "redirect" | "confirm" | "success" | "failed"
+  >("failed");
 
   const { mutate: updateSubscription } = useUpdateSubscription();
   const getNewPaymentStatus = async (newPayment: Payment) => {
@@ -51,7 +51,7 @@ export default function PaymentStatus() {
           updateSubscription();
         } else if (status === "failed") {
           console.log("failed");
-          // todo 处理支付失败情况
+          setStep("failed");
           clearInterval(timer!);
         } else if (status === "pending") {
           console.log("pending");
@@ -115,6 +115,21 @@ export default function PaymentStatus() {
       </div>
     );
   };
+  function PaymentFailed() {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <X className="h-10 w-10 mx-auto text-red-500" />
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">支付失败</h2>
+            <p className="text-sm text-muted-foreground">
+              请稍后再试，或联系客服
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   function PaymentSuccess({ payment }: { payment: Payment | null }) {
     if (!payment) return null;
     const orderNumber = payment.id;
@@ -206,6 +221,7 @@ export default function PaymentStatus() {
       {/* {step === "redirect" && <Redirect />} */}
       {step === "confirm" && <Loading />}
       {step === "success" && <PaymentSuccess payment={newPayment} />}
+      {step === "failed" && <PaymentFailed />}
     </>
   );
 }
