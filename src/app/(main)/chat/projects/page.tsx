@@ -18,47 +18,33 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/store/app";
 import { useDeleteProject, useGetProjects } from "@/hooks/use-projects";
+import { useI18n } from "@/i18n";
 
 export default function ChatProjectsPage() {
+  const t = useI18n();
+
   const { setAddProjectDialogOpen } = useProjectsStore();
   const { user } = useAppStore();
 
-  //   const [projects, setProjects] = useState<Project[]>([]);
-  // const [loading, setLoading] = useState(false);
-
-  // 新增获取projects的函数
-  //   const fetchProjects = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const response = await projectsApi.getProjectsList();
-  //       setProjects(response);
-  //     } catch (error) {
-  //       console.error("Failed to fetch projects:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
   const { data: projects = [] } = useGetProjects();
-  const [search, setSearch] = useState("");
+  const { mutate: deleteProject } = useDeleteProject();
 
+  const [search, setSearch] = useState("");
   const filteredProjects = projects.filter((project) =>
     project.name.toLowerCase().includes(search.toLowerCase())
   );
-
-  const { mutate: deleteProject } = useDeleteProject();
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="bg-bacsakground/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <header className="px-4 flex justify-between items-center h-12">
-          <h1 className="text-sm font-medium">Projects</h1>
+          <h1 className="text-sm font-medium">{t("project.title")}</h1>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setAddProjectDialogOpen(true)}
           >
-            New Project
+            {t("project.addBtn")}
           </Button>
         </header>
         <Separator />
@@ -68,7 +54,7 @@ export default function ChatProjectsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border-0 rounded-none outline-none focus-visible:ring-0 shadow-none"
-            placeholder="Search your projects"
+            placeholder={t("project.searchPlaceholder")}
           ></Input>
         </div>
         <Separator />
@@ -78,9 +64,9 @@ export default function ChatProjectsPage() {
               className="flex flex-col justify-center items-center h-96"
               style={{ height: "600px" }}
             >
-              <div>No Projects</div>
+              <div>{t("project.searchEmptyTitle")}</div>
               <div className="text-sm text-muted-foreground">
-                To get started, create a new project.{" "}
+                {t("project.searchEmptyDesc")}
               </div>
             </Card>
           </div>
@@ -113,7 +99,7 @@ export default function ChatProjectsPage() {
                       {user?.username}
                     </span>
                     <span className="text-sm text-gray-400 whitespace-nowrap">
-                      Updated {dayjs(project.updatedAt).fromNow()}
+                      {dayjs(project.updatedAt).fromNow()}
                     </span>
                   </div>
                   <DropdownMenu>
@@ -123,7 +109,7 @@ export default function ChatProjectsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem>{t("editBtn")}</DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.preventDefault();
@@ -131,7 +117,7 @@ export default function ChatProjectsPage() {
                         }}
                         className="text-red-500 focus:bg-red-100 focus:text-red-500"
                       >
-                        Delete
+                        {t("deleteBtn")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

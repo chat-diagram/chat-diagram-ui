@@ -22,9 +22,11 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useCreateProject } from "@/hooks/use-projects";
+import { useI18n } from "@/i18n";
 
 export const AddProjectDialog = () => {
   const router = useRouter();
+  const t = useI18n();
   const { addProjectDialogOpen, setAddProjectDialogOpen } = useProjectsStore();
   const addProjectFormSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -62,7 +64,7 @@ export const AddProjectDialog = () => {
     >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create a new project</DialogTitle>
+          <DialogTitle>{t("project.addDialog.title")}</DialogTitle>
         </DialogHeader>
         <Form {...addProjectForm}>
           <form
@@ -75,11 +77,12 @@ export const AddProjectDialog = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Name <span className="text-red-500">*</span>
+                    {t("project.addDialog.name")}{" "}
+                    <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="This is a project name"
+                      placeholder={t("project.addDialog.namePlaceholder")}
                       {...field}
                     ></Input>
                   </FormControl>
@@ -92,10 +95,12 @@ export const AddProjectDialog = () => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("project.addDialog.description")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="This is a description"
+                      placeholder={t(
+                        "project.addDialog.descriptionPlaceholder"
+                      )}
                       {...field}
                     ></Input>
                   </FormControl>
@@ -109,9 +114,9 @@ export const AddProjectDialog = () => {
                 variant="outline"
                 onClick={() => setAddProjectDialogOpen(false)}
               >
-                Cancel
+                {t("cancelBtn")}
               </Button>
-              <Button type="submit">Create</Button>
+              <Button type="submit">{t("createBtn")}</Button>
             </DialogFooter>
           </form>
         </Form>

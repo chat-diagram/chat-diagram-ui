@@ -17,6 +17,7 @@ import { usePathname } from "next/navigation";
 import { useProjectsStore } from "@/store/projects";
 import { useAppStore } from "@/store/app";
 import { useGetProjects } from "@/hooks/use-projects";
+import { useI18n } from "@/i18n";
 // This is sample data.
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -25,6 +26,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAppStore();
 
   const { data: projects = [] } = useGetProjects();
+
+  const t = useI18n();
 
   const data = {
     // user: {
@@ -92,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       // },
       //
       {
-        title: "Projects",
+        title: t("project.title"),
         url: "/chat/projects",
         icon: FolderClosed,
         isActive: currentPath === "/chat/projects",

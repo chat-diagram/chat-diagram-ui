@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { useI18n } from "@/i18n";
 
 export function NavMain({
   items,
@@ -28,6 +29,7 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const t = useI18n();
   // const isMobile = useIsMobile();
 
   return (
@@ -54,7 +56,7 @@ export function NavMain({
                   <Plus size={16} onClick={() => item.onExtraClick()} />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Add a new project</p>
+                  <p>{t("project.siderBtn.addTooltip")}</p>
                 </TooltipContent>
               </Tooltip>
 

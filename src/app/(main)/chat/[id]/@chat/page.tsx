@@ -32,6 +32,7 @@ import { useDiagramsStore } from "@/store/diagrams";
 import { queryClient } from "@/lib/request";
 import { useStyle } from "./styles";
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/i18n";
 
 const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
   user: User
@@ -70,6 +71,8 @@ const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
 });
 
 const Independent: React.FC = () => {
+  const t = useI18n();
+
   const [title, setTitle] = useState("");
   const { user } = useAppStore();
 
@@ -314,14 +317,14 @@ const Independent: React.FC = () => {
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 {versionId === "new" ? (
                   <div className="flex items-center">
-                    Generating diagram
+                    {t("diagram.generating")}
                     <div style={{ width: "2em" }}>
                       <span className={styles.loadingDots}></span>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p>Generated diagram</p>
+                    <p>{t("diagram.generated")}</p>
                     <Badge variant="secondary" className="text-gray-500">
                       v{versionNumber}
                     </Badge>
@@ -482,7 +485,7 @@ const Independent: React.FC = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/chat/projects`}>Projects</Link>
+                <Link href={`/chat/projects`}>{t("project.title")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -513,7 +516,7 @@ const Independent: React.FC = () => {
                     </BreadcrumbPage>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Rename Diagram</p>
+                    <p>{t("diagram.renameBtnTooltip")}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -539,7 +542,7 @@ const Independent: React.FC = () => {
         />
 
         {/* 🌟 输入框 */}
-        <div>
+        <div className={styles.sender}>
           <CustomSender
             content={content}
             onEnhance={() => enhanceDescription(content)}

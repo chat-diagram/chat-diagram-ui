@@ -29,6 +29,7 @@ import { Project } from "@/lib/api/projects";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n";
 
 export function NavProjects({ projects }: { projects: Project[] }) {
   const router = useRouter();
@@ -42,9 +43,11 @@ export function NavProjects({ projects }: { projects: Project[] }) {
 
   const { mutate: deleteProject } = useDeleteProject();
 
+  const t = useI18n();
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("project.title")}</SidebarGroupLabel>
       <SidebarMenu>
         {visibleProjects.map((item) => (
           <SidebarMenuItem key={item.id}>
@@ -76,11 +79,11 @@ export function NavProjects({ projects }: { projects: Project[] }) {
                   }}
                 >
                   <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
+                  <span>{t("project.siderBtn.view")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
+                  <span>{t("project.siderBtn.share")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -88,7 +91,7 @@ export function NavProjects({ projects }: { projects: Project[] }) {
                   className="text-red-500 focus:bg-red-100 focus:text-red-500  "
                 >
                   <Trash2 />
-                  <span>Delete Project</span>
+                  <span>{t("project.siderBtn.delete")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -37,6 +37,8 @@ import { Separator } from "./ui/separator";
 import { useAppStore } from "@/store/app";
 import Link from "next/link";
 import { ModeToggle } from "./toggle-mode";
+import { LanguageSwitcher } from "./language-switcher";
+import { useI18n } from "@/i18n";
 
 const SettingDialog = ({
   open,
@@ -68,11 +70,12 @@ const SettingDialog = ({
     }
     deleteUser(user?.id);
   };
+  const t = useI18n();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogHeader></DialogHeader>
       <DialogContent>
-        <DialogTitle>Settings</DialogTitle>
+        <DialogTitle>{t("account.nav.settingsDialog.title")}</DialogTitle>
         <Tabs
           defaultValue="account"
           className="w-full"
@@ -81,16 +84,18 @@ const SettingDialog = ({
         >
           <TabsList muted className="flex w-full ">
             <TabsTrigger value="common" className="flex-1">
-              通用设置
+              {t("account.nav.settingsDialog.common")}
             </TabsTrigger>
             <TabsTrigger value="account" className="flex-1">
-              账户信息
+              {t("account.nav.settingsDialog.account")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
         {activeTab === "account" && (
           <div className="px-0">
-            <Item right={user?.email}>电子邮件</Item>
+            <Item right={user?.email}>
+              {t("account.nav.settingsDialog.email")}
+            </Item>
             <Separator />
             <Item
               right={
@@ -98,16 +103,18 @@ const SettingDialog = ({
                   // "Pro"
                   <Badge variant="secondary" className="h-4 gap-1 px-1 text-sm">
                     <Crown style={{ height: "1rem", width: "1rem" }} />
-                    <span> PRO</span>
+                    <span> {t("account.nav.subscription.pro")}</span>
                   </Badge>
                 ) : (
                   <Button variant="outline" size="sm">
-                    <Link href="/payment">升级Pro</Link>
+                    <Link href="/payment">
+                      {t("account.nav.settingsDialog.upgrade")}
+                    </Link>
                   </Button>
                 )
               }
             >
-              订阅
+              {t("account.nav.settingsDialog.subscription")}
             </Item>
             <Separator />
             <Item
@@ -117,11 +124,11 @@ const SettingDialog = ({
                   size="sm"
                   onClick={handleDeleteUser}
                 >
-                  注销
+                  {t("account.nav.settingsDialog.cancelBtn")}
                 </Button>
               }
             >
-              注销账号
+              {t("account.nav.settingsDialog.cancel")}
             </Item>
           </div>
         )}
@@ -131,6 +138,7 @@ const SettingDialog = ({
 };
 
 export function NavUser({ user }: { user: User }) {
+  const t = useI18n();
   const { isMobile } = useSidebar();
 
   const { mutate: logout } = useLogout();
@@ -171,7 +179,7 @@ export function NavUser({ user }: { user: User }) {
                       className="h-4 gap-1 px-1 text-xs"
                     >
                       <Crown style={{ height: "0.75rem", width: "0.75rem" }} />
-                      <span> PRO</span>
+                      <span>{t("account.nav.subscription.pro")}</span>
                     </Badge>
                   )}
                 </div>
@@ -200,7 +208,7 @@ export function NavUser({ user }: { user: User }) {
                 </div>
               </div>
             </DropdownMenuLabel> */}
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("account.nav.title")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
@@ -214,10 +222,12 @@ export function NavUser({ user }: { user: User }) {
               >
                 {user?.subscription?.isPro ? <Crown /> : <Sparkles />}
                 {/* Upgrade to Pro */}
-                {user?.subscription?.isPro ? "Pro Member" : "Upgrade to Pro"}
+                {user?.subscription?.isPro
+                  ? t("account.nav.subscription.proMember")
+                  : t("account.nav.upgrade")}
                 {isPro && (
                   <Badge variant="secondary" className="ml-auto">
-                    Active
+                    {t("account.nav.subscription.active")}
                   </Badge>
                 )}
               </DropdownMenuItem>
@@ -226,16 +236,16 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => setSettingDialogOpen(true)}>
                 <Settings />
-                Settings
+                {t("account.nav.settings")}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push("/payment/billings")}
               >
                 <CreditCard />
-                Billing
+                {t("account.nav.billing")}
                 {isPro && (
                   <Badge variant="secondary" className="ml-auto">
-                    Pro
+                    {t("account.nav.subscription.pro")}
                   </Badge>
                 )}
               </DropdownMenuItem>
@@ -253,22 +263,30 @@ export function NavUser({ user }: { user: User }) {
               {/* <DropdownMenuLabel> */}
               <div className="py-1">
                 <span className="text-xs ml-2 text-foreground/70 ">
-                  Preferences
+                  {t("account.nav.preferences")}
                 </span>
               </div>
               <div className="py-1">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2 text-sm ml-2">
-                    <span>Theme</span>
+                    <span>{t("account.nav.theme")}</span>
                   </div>
                   <ModeToggle />
+                </div>
+              </div>
+              <div className="py-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2 text-sm ml-2">
+                    <span>{t("account.nav.language")}</span>
+                  </div>
+                  <LanguageSwitcher />
                 </div>
               </div>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>
               <LogOut />
-              Log out
+              {t("account.nav.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

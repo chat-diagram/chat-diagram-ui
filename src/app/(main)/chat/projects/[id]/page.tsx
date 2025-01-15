@@ -32,6 +32,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppStore } from "@/store/app";
 import { Avatar } from "@/components/avatar";
 import { useDiagramsStore } from "@/store/diagrams";
+import { useI18n } from "@/i18n";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -73,6 +74,7 @@ export default function ProjectDetailPage() {
 
   const { setRenameDiagramDialogOpen } = useDiagramsStore();
 
+  const t = useI18n();
   return (
     <div className="h-screen flex flex-col">
       <div className="bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -82,7 +84,7 @@ export default function ProjectDetailPage() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/chat/projects">Projects</Link>
+                  <Link href="/chat/projects">{t("project.title")}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -166,7 +168,7 @@ export default function ProjectDetailPage() {
                             setRenameDiagramDialogOpen(true, diagram);
                           }}
                         >
-                          Edit
+                          {t("editBtn")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
@@ -176,7 +178,7 @@ export default function ProjectDetailPage() {
                           }}
                           className="text-red-500 focus:bg-red-100 focus:text-red-500"
                         >
-                          Delete
+                          {t("deleteBtn")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

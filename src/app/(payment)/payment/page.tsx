@@ -8,6 +8,7 @@ import { Check, Flame, Loader2 } from "lucide-react";
 import { AlipayCircleOutlined } from "@ant-design/icons";
 import { Payment, paymentApi } from "@/lib/api/payment";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n";
 
 // function PaymentSuccess({ payment }: { payment: Payment | null }) {
 //   if (!payment) return null;
@@ -96,6 +97,7 @@ import { useRouter } from "next/navigation";
 // }
 
 export default function PaymentPage() {
+  const t = useI18n();
   const [newPayment, setNewPayment] = useState<Payment | null>(null);
   const [step, setStep] = useState<"pay" | "redirect" | "confirm" | "success">(
     "pay"
@@ -104,76 +106,27 @@ export default function PaymentPage() {
 
   const Redirect = () => {
     useEffect(() => {
-      router.push(newPayment.payUrl);
+      if (newPayment) {
+        router.push(newPayment.payUrl);
+      }
     }, [newPayment]);
-    // if (!newPayment) return null;
-    // router.push(newPayment.payUrl,{n});
-    // setTimeout(() => {
-    // window.open(newPayment.payUrl, "_blank");
-    // console.log("newPayment.payUrl", newPayment.payUrl);
-    // setStep("confirm");
-    // }, 1000);
+
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <div className="text-center space-y-4">
           <Loader2 className="h-10 w-10 animate-spin mx-auto text-primary" />
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold">正在跳转到支付...</h2>
+            <h2 className="text-xl font-semibold">
+              {t("payment.redirecting")}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              请稍候，正在为您准备支付环境
+              {t("payment.preparingPayment")}
             </p>
           </div>
         </div>
       </div>
     );
   };
-  // const Loading = () => {
-  //   // const paymentStatus =
-  //   const getNewPaymentStatus = async () => {
-  //     if (!newPayment) return null;
-  //     const payment = await paymentApi.getPaymentDetail(newPayment.id);
-  //     return payment.status;
-  //   };
-  //   useEffect(() => {
-  //     let timer: NodeJS.Timeout | null = null;
-  //     const checkPaymentStatus = async () => {
-  //       if (!newPayment) return;
-
-  //       const status = await getNewPaymentStatus();
-  //       if (status === "success") {
-  //         setStep("success");
-  //         clearInterval(timer!);
-  //       } else if (status === "failed") {
-  //         // todo 处理支付失败情况
-  //         clearInterval(timer!);
-  //       }
-  //     };
-
-  //     // 每3秒检查一次支付状态
-  //     timer = setInterval(checkPaymentStatus, 3000);
-
-  //     // 5分钟后停止轮询
-  //     setTimeout(() => {
-  //       clearInterval(timer);
-  //     }, 5 * 60 * 1000);
-
-  //     return () => {
-  //       clearInterval(timer);
-  //     };
-  //   }, [newPayment]);
-  //   return (
-  //     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-  //       <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-  //       <h2 className="text-xl font-semibold">正在确认支付结果...</h2>
-  //       <p className="text-sm text-muted-foreground">
-  //         请耐心等待，正在处理您的支付
-  //       </p>
-  //     </div>
-  //   );
-  // };
-  // const [step, setStep] = useState<"pay" | "redirect" | "confirm" | "success">(
-  //   "pay"
-  // );
 
   const [selectedDuration, setSelectedDuration] = useState(12);
   const [selectedPayment, setSelectedPayment] = useState("alipay");
@@ -187,18 +140,22 @@ export default function PaymentPage() {
 
   const benefits = [
     [
-      "无限对话次数",
-      "无限项目",
-
+      t("payment.unlimitedDiagrams"),
+      t("payment.unlimitedProjects"),
+      // t("payment.gpt4Support"),
       //  "GPT-4 模型支持",
     ],
-    ["无限优化描述", "高级样式配置"],
+    [
+      t("payment.unlimitedOptimize"),
+      t("payment.advancedStyle"),
+      // "高级样式配置",
+    ],
 
     // ["流程图生成", "思维导图生成", "自定义提示词"],
     [
       // "API 访问支持",
       //  "团队协作功能",
-      "优先客服支持",
+      t("payment.prioritySupport"),
     ],
   ];
 
@@ -226,21 +183,25 @@ export default function PaymentPage() {
           <div className="max-w-4xl mx-auto space-y-12">
             {/* Header */}
             <div className="text-center space-y-4">
-              <h1 className="text-4xl font-bold">Membership Plans</h1>
+              <h1 className="text-4xl font-bold">
+                {t("payment.membershipPlans")}
+              </h1>
               <p className="text-xl text-gray-500 dark:text-gray-400">
-                选择适合您的会员计划，享受更多AI智能服务
+                {t("payment.membershipPlansDesc")}
               </p>
             </div>
 
             {/* Price Display */}
             <Card className="p-8 text-center bg-background shadow-lg rounded-2xl">
               <div className="space-y-4">
-                <h2 className="text-xl font-medium">Starting at</h2>
+                <h2 className="text-xl font-medium">
+                  {t("payment.startingAt")}
+                </h2>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-3xl">¥</span>
                   <span className="text-6xl font-bold">{monthlyPrice}</span>
                   <span className="text-xl text-gray-500 dark:text-gray-400">
-                    /month
+                    /{t("payment.month")}
                   </span>
                 </div>
                 {/* <p className="text-gray-500">Includes a 7-day free trial</p> */}
@@ -261,11 +222,11 @@ export default function PaymentPage() {
                     }`}
                     onClick={() => setSelectedDuration(months)}
                   >
-                    {months}个月
+                    {months} {t("payment.monthUnit", { count: months })}
                     {recommended && (
                       <Badge className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-500">
                         <Flame className="w-3 h-3 mr-1" />
-                        优惠
+                        {t("payment.discount")}
                       </Badge>
                     )}
                   </Button>
@@ -275,7 +236,9 @@ export default function PaymentPage() {
 
             {/* Benefits */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-center">会员权益</h2>
+              <h2 className="text-2xl font-bold text-center">
+                {t("payment.membershipBenefits")}
+              </h2>
               <div className="grid md:grid-cols-3 gap-8">
                 {benefits.map((columnBenefits, i) => (
                   <div key={i} className="space-y-4">
@@ -296,7 +259,9 @@ export default function PaymentPage() {
 
             {/* Payment Method */}
             <Card className="p-6 bg-background shadow-lg rounded-2xl">
-              <h3 className="text-lg font-medium mb-4">选择支付方式</h3>
+              <h3 className="text-lg font-medium mb-4">
+                {t("payment.choosePaymentMethod")}
+              </h3>
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant={selectedPayment === "alipay" ? "default" : "outline"}
@@ -308,7 +273,7 @@ export default function PaymentPage() {
                   onClick={() => setSelectedPayment("alipay")}
                 >
                   <AlipayCircleOutlined />
-                  支付宝
+                  {t("payment.alipay")}
                 </Button>
                 {/* <Button
               variant={selectedPayment === "wechat" ? "default" : "outline"}
@@ -327,11 +292,14 @@ export default function PaymentPage() {
             <Card className="p-6 bg-background shadow-lg rounded-2xl">
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
-                  <span>商品名称</span>
-                  <span>chat-diagram Pro({selectedDuration}个月)</span>
+                  <span>{t("payment.tradeName")}</span>
+                  <span>
+                    {t("payment.tradeNameDetail")}({selectedDuration}{" "}
+                    {t("payment.monthUnit", { count: selectedDuration })})
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold">
-                  <span>需要支付</span>
+                  <span>{t("payment.needPay")}</span>
                   <span>¥ {selectedPlan?.price.toFixed(2)}</span>
                 </div>
               </div>
@@ -341,7 +309,7 @@ export default function PaymentPage() {
               className="w-full bg-black hover:bg-gray-800 text-lg py-6 dark:bg-white "
               onClick={handlePayment}
             >
-              立即开通
+              {t("payment.payNow")}
             </Button>
           </div>
         </div>

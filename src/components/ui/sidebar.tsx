@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useI18n } from "@/i18n";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -264,7 +265,7 @@ const SidebarTrigger = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
-
+  const t = useI18n();
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -281,11 +282,11 @@ const SidebarTrigger = React.forwardRef<
           {...props}
         >
           <PanelLeft />
-          <span className="sr-only">Toggle Sidebar</span>
+          {/* <span className="sr-only">Toggle Sidebar</span> */}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Toggle Sidebar</p>
+        <p>{t("siderBar.toggleTooltipContent")}</p>
       </TooltipContent>
     </Tooltip>
   );

@@ -27,9 +27,9 @@ const MonacoEditor = ({
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   // 添加新的 useEffect 来处理主题切换
-  useEffect(() => {
-    let finalTheme = nextTheme;
+  let finalTheme = nextTheme;
 
+  useEffect(() => {
     const updateTheme = () => {
       if (nextTheme === "system") {
         if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -70,7 +70,7 @@ const MonacoEditor = ({
       scrollBeyondLastLine: false,
       fontSize: 14,
       tabSize: 2,
-      theme: nextTheme === "dark" ? "vs-dark" : "light",
+      theme: finalTheme,
     });
     initEditor(monaco);
     onMount(editor, monaco);

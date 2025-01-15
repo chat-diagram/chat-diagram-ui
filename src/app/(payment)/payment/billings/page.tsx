@@ -24,6 +24,7 @@ import { useAppStore } from "@/store/app";
 import Link from "next/link";
 import { usePaymentsHistory } from "@/hooks/use-payments";
 import { paymentApi } from "@/lib/api/payment";
+import { useI18n } from "@/i18n";
 
 interface Order {
   id: string;
@@ -72,23 +73,27 @@ const orders: Order[] = [
 ];
 
 function EmptyState() {
+  const t = useI18n();
   return (
     <div className="text-center py-12 bg-background">
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
         <Receipt className="w-8 h-8 text-gray-400 dark:text-gray-600" />
       </div>
-      <h3 className="text-lg font-medium mb-2">暂无账单记录</h3>
+      <h3 className="text-lg font-medium mb-2">
+        {t("payment.billings.historyEmptyTitle")}
+      </h3>
       <p className="text-gray-500 mb-6">
-        您还没有任何交易记录。开始使用我们的服务，账单将会在这里显示。
+        {t("payment.billings.historyEmptyDesc")}
       </p>
       <Button asChild>
-        <Link href="/payment">查看会员方案</Link>
+        <Link href="/payment">{t("payment.billings.historyEmptyBtn")}</Link>
       </Button>
     </div>
   );
 }
 
 export default function BillingHistory() {
+  const t = useI18n();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const isPro = useAppStore((state) => state.user?.subscription?.isPro);
   if (!isPro) {
@@ -106,9 +111,11 @@ export default function BillingHistory() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">账单记录</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            {t("payment.billings.historyTitle")}
+          </h1>
           <p className="text-gray-500 dark:text-gray-400">
-            查看您的所有交易记录和订单详情
+            {t("payment.billings.historyDesc")}
           </p>
         </div>
 
@@ -117,11 +124,11 @@ export default function BillingHistory() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>订单编号</TableHead>
-                  <TableHead>支付日期</TableHead>
-                  <TableHead>金额</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>计划</TableHead>
+                  <TableHead>{t("payment.billings.tradeNumber")}</TableHead>
+                  <TableHead>{t("payment.billings.tradePaidAt")}</TableHead>
+                  <TableHead>{t("payment.billings.tradeAmount")}</TableHead>
+                  <TableHead>{t("payment.billings.tradeStatus")}</TableHead>
+                  <TableHead>{t("payment.billings.tradeDuration")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -144,7 +151,9 @@ export default function BillingHistory() {
                         {order.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{order.durationInDays}天</TableCell>
+                    <TableCell>
+                      {order.durationInDays} {t("payment.billings.dayUnit")}
+                    </TableCell>
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>
@@ -157,30 +166,43 @@ export default function BillingHistory() {
                               handleGetOrderDetail(order);
                             }}
                           >
-                            详情 <ChevronDown className="ml-1 h-4 w-4" />
+                            {t("payment.billings.tradeDetailBtn")}{" "}
+                            <ChevronDown className="ml-1 h-4 w-4" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
                             <DialogTitle>
-                              订单详情 - {selectedOrder?.id}
+                              {t("payment.billings.tradeDetailTitle")}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4 mt-4">
                             <div className="flex justify-between">
-                              <span className="text-gray-500">支付日期</span>
+                              <span className="text-gray-500">
+                                {t("payment.billings.tradeNumber")}
+                              </span>
+                              <span>{selectedOrder?.id}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">
+                                {t("payment.billings.tradePaidAt")}
+                              </span>
                               <span>
                                 {formatDateTime(selectedOrder?.paidAt)}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-500">金额</span>
+                              <span className="text-gray-500">
+                                {t("payment.billings.tradeAmount")}
+                              </span>
                               <span>
                                 ¥ {(selectedOrder?.amount / 100).toFixed(2)}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-500">状态</span>
+                              <span className="text-gray-500">
+                                {t("payment.billings.tradeStatus")}
+                              </span>
                               <Badge
                                 variant={
                                   selectedOrder?.status === "success"
@@ -194,8 +216,13 @@ export default function BillingHistory() {
                               </Badge>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-500">计划</span>
-                              <span>{selectedOrder?.plan}</span>
+                              <span className="text-gray-500">
+                                {t("payment.billings.tradeDuration")}
+                              </span>
+                              <span>
+                                {selectedOrder?.durationInDays}{" "}
+                                {t("payment.billings.dayUnit")}
+                              </span>
                             </div>
                           </div>
                           {/* <Button className="mt-6 w-full">
@@ -214,9 +241,9 @@ export default function BillingHistory() {
         </Card>
 
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>如果您有任何问题或需要帮助，请联系我们的客户支持团队。</p>
+          <p>{t("payment.billings.helpTips")}</p>
           {/* todo */}
-          <p>邮箱: xxxxx@chatdiagram.com | 电话: xxxxx</p>
+          <p>{t("payment.billings.helpInfo")}</p>
         </div>
       </div>
     </div>

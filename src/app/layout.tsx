@@ -1,6 +1,7 @@
 import { AuthGuard } from "@/components/auth-guard";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/components/theme-providers";
+import { I18nProvider } from "@/components/language-switcher";
 
 import "@ant-design/v5-patch-for-react-19";
 
@@ -22,16 +23,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <QueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthGuard>{children}</AuthGuard>
-          </ThemeProvider>
-        </QueryProvider>
+        <I18nProvider>
+          <QueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <AuthGuard>{children}</AuthGuard>
+            </ThemeProvider>
+          </QueryProvider>
+        </I18nProvider>
       </body>
     </html>
   );

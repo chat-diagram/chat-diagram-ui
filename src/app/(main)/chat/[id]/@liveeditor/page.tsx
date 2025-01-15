@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRollbackDiagramVersion } from "@/hooks/use-diagrams";
 import { useTheme } from "next-themes";
+import { useI18n } from "@/i18n";
 const LiveEditor = () => {
   const [activeTab, setActiveTab] = useState("preview");
   // 初始化 mermaid
@@ -154,6 +155,7 @@ const LiveEditor = () => {
     }
   };
 
+  const t = useI18n();
   return (
     <div className="flex flex-col h-screen" style={{ minWidth: "400px" }}>
       <div className="w-full p-1 border-b  flex items-center gap-2">
@@ -166,15 +168,22 @@ const LiveEditor = () => {
         </Button>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="preview">预览</TabsTrigger>
-            <TabsTrigger value="code">代码</TabsTrigger>
+            <TabsTrigger value="preview">{t("diagram.previewBtn")}</TabsTrigger>
+            <TabsTrigger value="code">{t("diagram.codeBtn")}</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="ml-auto flex gap-2">
           {diagram?.currentVersion === activeDiagramVersion?.versionNumber ? (
-            <Badge variant="success" className="ml-4">
-              最新版本
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="success" className="ml-4">
+                  {t("diagram.latestBadge")}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("diagram.latestTooltip")}</p>
+              </TooltipContent>
+            </Tooltip>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -186,11 +195,11 @@ const LiveEditor = () => {
                   className="ml-4"
                   style={{ cursor: "pointer" }}
                 >
-                  回滚到此版本
+                  {t("diagram.rollbackBtn")}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>
-                <p>回滚到此版本，之后的版本会被删除</p>
+                <p>{t("diagram.rollbackTooltip")}</p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -207,7 +216,7 @@ const LiveEditor = () => {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>查看上一个版本</p>
+              <p>{t("diagram.previousTooltip")}</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -222,7 +231,7 @@ const LiveEditor = () => {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>查看下一个版本</p>
+              <p>{t("diagram.laterTooltip")}</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -250,7 +259,7 @@ const LiveEditor = () => {
         ></div>
         {isError && (
           <div className="text-red-500 text-sm p-2">
-            语法错误，请检查您的 Mermaid 语法
+            {t("diagram.syntaxError")}
           </div>
         )}
       </div>

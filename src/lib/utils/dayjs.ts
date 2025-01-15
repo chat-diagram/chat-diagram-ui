@@ -1,10 +1,17 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/en"; // 导入英文语言包
+// 导入所需的语言包
+import "dayjs/locale/en";
+import "dayjs/locale/zh";
+import i18n from "@/i18n";
 
 dayjs.extend(relativeTime);
-dayjs.locale("en"); // 设置语言为英文
+dayjs.locale(i18n.language);
 
+// 监听语言变化
+i18n.on("languageChanged", (lng) => {
+  dayjs.locale(lng);
+});
 export default dayjs;
 
 export const formatDateTime = (date: string) => {

@@ -5,6 +5,7 @@ import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import Link from "next/link";
 import { Button as CustomButtom } from "./ui/button";
+import { useI18n } from "@/i18n";
 
 export const CustomSender = ({
   content,
@@ -22,11 +23,7 @@ export const CustomSender = ({
   onEnhance: () => void;
 }) => {
   const [showUpgrade, setShowUpgrade] = React.useState(true);
-  {
-    /* <div className="flex items-center justify-center w-[14px] h-[22px]">
-        <Sparkles style={{ color: "#1890FF", width: "14px", height: "22px" }} />
-      </div> */
-  }
+  const t = useI18n();
   const enhanceNode = (
     <Badge dot={false}>
       <Tooltip>
@@ -41,25 +38,10 @@ export const CustomSender = ({
             }
           />
         </TooltipTrigger>
-        <TooltipContent>enhance your message</TooltipContent>
+        <TooltipContent>{t("sender.enhanceTool")}</TooltipContent>
       </Tooltip>
     </Badge>
   );
-  // const [recording, setRecording] = React.useState(false);
-
-  // const headerNode = (
-  //   <Sender.Header
-  //     open={showUpgrade}
-  //     title={
-  //       <div className="px-2">
-  //         <span className="text-sm font-medium text-gray-900 ">
-  //           Upgrade to Pro to unlock all features
-  //         </span>
-  //       </div>
-  //     }
-  //     onOpenChange={setShowUpgrade}
-  //   />
-  // );
 
   return (
     <div className="relative flex flex-col gap-4">
@@ -75,7 +57,7 @@ export const CustomSender = ({
           >
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium ">
-                Upgrade to Pro to unlock all features
+                {t("sender.upgrade")}
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -84,7 +66,7 @@ export const CustomSender = ({
                 className="text-sm font-medium text-gray-900"
               >
                 <CustomButtom variant="link" size="sm">
-                  Upgrade
+                  {t("sender.upgradeBtn")}
                 </CustomButtom>
               </Link>
               <button
@@ -128,7 +110,7 @@ export const CustomSender = ({
           classNames={{
             input: "placeholder:text-gray-400 dark:text-white",
           }}
-          placeholder="Type your message here..."
+          placeholder={t("sender.placeholder")}
           className="bg-background border-border "
         />
       </div>

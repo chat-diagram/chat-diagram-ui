@@ -22,8 +22,10 @@ import { Button } from "./ui/button";
 import { useDiagramsStore } from "@/store/diagrams";
 import { useEffect } from "react";
 import { useRenameDiagram } from "@/hooks/use-diagrams";
+import { useI18n } from "@/i18n";
 
 export const RenameDiagramDialog = () => {
+  const t = useI18n();
   const {
     renameDiagramDialogOpen,
     setRenameDiagramDialogOpen,
@@ -72,7 +74,7 @@ export const RenameDiagramDialog = () => {
     >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Rename Diagram</DialogTitle>
+          <DialogTitle>{t("diagram.renameDialogTitle")}</DialogTitle>
         </DialogHeader>
         <Form {...renameDiagramForm}>
           <form
@@ -85,11 +87,12 @@ export const RenameDiagramDialog = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Name <span className="text-red-500">*</span>
+                    {t("diagram.renameDialogName")}{" "}
+                    <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="This is a diagram name"
+                      placeholder={t("diagram.renameDialogNamePlaceholder")}
                       {...field}
                     ></Input>
                   </FormControl>
@@ -119,9 +122,11 @@ export const RenameDiagramDialog = () => {
                 variant="outline"
                 onClick={() => setRenameDiagramDialogOpen(false)}
               >
-                Cancel
+                {t("diagram.renameDialogCancelBtn")}
               </Button>
-              <Button type="submit">Rename</Button>
+              <Button type="submit">
+                {t("diagram.renameDialogConfirmBtn")}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

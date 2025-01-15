@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useUpdateSubscription } from "@/hooks/use-auth";
+import { useI18n } from "@/i18n";
 import { Payment, paymentApi } from "@/lib/api/payment";
 import { Check, Loader2, X } from "lucide-react";
 import Link from "next/link";
@@ -9,11 +10,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function PaymentStatus() {
+  const t = useI18n();
   const paymentId = useParams().id;
   const [newPayment, setNewPayment] = useState<Payment | null>(null);
   const [step, setStep] = useState<
     "redirect" | "confirm" | "success" | "failed"
-  >("failed");
+  >("confirm");
 
   const { mutate: updateSubscription } = useUpdateSubscription();
   const getNewPaymentStatus = async (newPayment: Payment) => {
@@ -83,34 +85,13 @@ export default function PaymentStatus() {
   //       updateSubscription();
   //     }
   //   }, [newPayment]);
-  const Redirect = () => {
-    paymentApi.getPaymentDetail(paymentId).then((payment) => {
-      if (payment.status === "pending") {
-      }
-      setNewPayment(payment);
-      setStep("confirm");
-    });
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-10 w-10 animate-spin mx-auto text-primary" />
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">正在跳转到支付...</h2>
-            <p className="text-sm text-muted-foreground">
-              请稍候，正在为您准备支付环境
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  };
   const Loading = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-        <h2 className="text-xl font-semibold">正在确认支付结果...</h2>
+        <h2 className="text-xl font-semibold">{t("payment.confirmPayment")}</h2>
         <p className="text-sm text-muted-foreground">
-          请耐心等待，正在处理您的支付
+          {t("payment.confirmPaymentDesc")}
         </p>
       </div>
     );
@@ -121,9 +102,9 @@ export default function PaymentStatus() {
         <div className="text-center space-y-4">
           <X className="h-10 w-10 mx-auto text-red-500" />
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold">支付失败</h2>
+            <h2 className="text-xl font-semibold">{t("payment.payFailed")}</h2>
             <p className="text-sm text-muted-foreground">
-              请稍后再试，或联系客服
+              {t("payment.payFailedDesc")}
             </p>
           </div>
         </div>
@@ -145,8 +126,10 @@ export default function PaymentStatus() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
               <Check className="w-12 h-12 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">支付成功</h1>
-            <p className="text-gray-500">感谢您的订购！您的会员权益已经生效</p>
+            <h1 className="text-3xl font-bold mb-2">
+              {t("payment.paySuccess")}
+            </h1>
+            <p className="text-gray-500">{t("payment.paySuccessDesc")}</p>
           </div>
 
           {/* Order Details Card */}
@@ -154,47 +137,54 @@ export default function PaymentStatus() {
             <div className="space-y-4 divide-y">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <span>订单编号</span>
+                  <span>{t("payment.orderNumber")}</span>
                   <span>{orderNumber}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <span>支付金额</span>
+                  <span>{t("payment.amount")}</span>
                   <span className="font-medium">¥ {amount}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <span>会员时长</span>
-                  <span>{membershipDuration} 个月</span>
+                  <span>{t("payment.membershipDuration")}</span>
+                  <span>
+                    {membershipDuration}{" "}
+                    {t("payment.monthUnit", { count: membershipDuration })}
+                  </span>
                 </div>
               </div>
 
               <div className="pt-4 space-y-2">
-                <h3 className="font-medium">会员权益已激活</h3>
+                <h3 className="font-medium">
+                  {t("payment.membershipBenefitsHasBeenActivated")}
+                </h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
-                    <span>无限对话次数</span>
+                    <span>{t("payment.unlimitedDiagrams")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
-                    <span>GPT-4 模型支持</span>
+                    <span>{t("payment.unlimitedOptimize")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="w-4 h-4 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
-                    <span>高级AI绘画功能</span>
+                    <span>{t("payment.advancedStyle")}</span>
                   </div>
                 </div>
               </div>
 
               <div className="pt-4">
-                <h3 className="font-medium mb-2">使用提示</h3>
+                <h3 className="font-medium mb-2">
+                  {t("payment.useTipsTitle")}
+                </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  您可以立即开始使用所有会员功能。如需帮助，请随时联系客服。
+                  {t("payment.useTipsDesc")}
                 </p>
               </div>
             </div>
@@ -206,7 +196,7 @@ export default function PaymentStatus() {
               asChild
               className="w-full bg-black hover:bg-gray-800 text-lg py-6 dark:bg-white "
             >
-              <Link href="/">开始使用</Link>
+              <Link href="/">{t("payment.useTipsBtn")}</Link>
             </Button>
             {/* <Button asChild variant="outline" className="w-full py-6 text-lg">
               <Link href="/help">查看会员指南</Link>
