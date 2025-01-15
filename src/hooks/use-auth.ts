@@ -39,9 +39,9 @@ export function useUpdateSubscription() {
       if (user) {
         user.subscription = data;
         // todo 假数据
-        user.subscription.remainingVersions = 1000000;
-        user.subscription.isPro = true;
-        user.subscription.proExpiresAt = "2029-01-13";
+        // user.subscription.remainingVersions = 1000000;
+        // user.subscription.isPro = true;
+        // user.subscription.proExpiresAt = "2029-01-13";
         setShowUpgrade(false);
         //
         queryClient.setQueryData(["user"], user);

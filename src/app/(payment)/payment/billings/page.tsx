@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { formatDateTime } from "@/lib/utils/dayjs";
 import {
   Table,
   TableBody,
@@ -18,9 +19,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, Download, Receipt } from "lucide-react";
+import { ChevronDown, Receipt } from "lucide-react";
 import { useAppStore } from "@/store/app";
 import Link from "next/link";
+import { usePaymentsHistory } from "@/hooks/use-payments";
+import { paymentApi } from "@/lib/api/payment";
 
 interface Order {
   id: string;
@@ -91,7 +94,14 @@ export default function BillingHistory() {
   if (!isPro) {
     orders.length = 0;
   }
+  const { data: paymentHistory = [], isLoading, error } = usePaymentsHistory();
 
+  // const selectedOrderId = useState;
+  // const { data: paymentDetail } = usePaymentDetail(selectedOrder?.id);
+  const handleGetOrderDetail = async (order: Order) => {
+    const detail = await paymentApi.getPaymentDetail(order.id);
+    setSelectedOrder(detail);
+  };
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-4">
@@ -103,12 +113,12 @@ export default function BillingHistory() {
         </div>
 
         <Card className="p-6 bg-background shadow-lg rounded-2xl">
-          {orders.length > 0 ? (
+          {paymentHistory.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>订单编号</TableHead>
-                  <TableHead>日期</TableHead>
+                  <TableHead>支付日期</TableHead>
                   <TableHead>金额</TableHead>
                   <TableHead>状态</TableHead>
                   <TableHead>计划</TableHead>
@@ -116,17 +126,17 @@ export default function BillingHistory() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {paymentHistory.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>{order.id}</TableCell>
-                    <TableCell>{order.date}</TableCell>
-                    <TableCell>¥ {order.amount.toFixed(2)}</TableCell>
+                    <TableCell>{formatDateTime(order.paidAt)}</TableCell>
+                    <TableCell>¥ {(order.amount / 100).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge
                         variant={
-                          order.status === "成功"
-                            ? "default"
-                            : order.status === "处理中"
+                          order.status === "success"
+                            ? "success"
+                            : order.status === "pending"
                             ? "outline"
                             : "destructive"
                         }
@@ -134,7 +144,7 @@ export default function BillingHistory() {
                         {order.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{order.plan}</TableCell>
+                    <TableCell>{order.durationInDays}天</TableCell>
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>
@@ -142,7 +152,10 @@ export default function BillingHistory() {
                             variant="ghost"
                             size="sm"
                             className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white"
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={() => {
+                              // setSelectedOrder(order);
+                              handleGetOrderDetail(order);
+                            }}
                           >
                             详情 <ChevronDown className="ml-1 h-4 w-4" />
                           </Button>
@@ -155,20 +168,24 @@ export default function BillingHistory() {
                           </DialogHeader>
                           <div className="space-y-4 mt-4">
                             <div className="flex justify-between">
-                              <span className="text-gray-500">订单日期</span>
-                              <span>{selectedOrder?.date}</span>
+                              <span className="text-gray-500">支付日期</span>
+                              <span>
+                                {formatDateTime(selectedOrder?.paidAt)}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">金额</span>
-                              <span>¥ {selectedOrder?.amount.toFixed(2)}</span>
+                              <span>
+                                ¥ {(selectedOrder?.amount / 100).toFixed(2)}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">状态</span>
                               <Badge
                                 variant={
-                                  selectedOrder?.status === "成功"
-                                    ? "default"
-                                    : selectedOrder?.status === "处理中"
+                                  selectedOrder?.status === "success"
+                                    ? "success"
+                                    : selectedOrder?.status === "pending"
                                     ? "outline"
                                     : "destructive"
                                 }
@@ -181,9 +198,9 @@ export default function BillingHistory() {
                               <span>{selectedOrder?.plan}</span>
                             </div>
                           </div>
-                          <Button className="mt-6 w-full">
+                          {/* <Button className="mt-6 w-full">
                             <Download className="mr-2 h-4 w-4" /> 下载发票
-                          </Button>
+                          </Button> */}
                         </DialogContent>
                       </Dialog>
                     </TableCell>
