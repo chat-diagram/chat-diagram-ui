@@ -21,11 +21,27 @@ export function SignupForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // 添加邮箱验证
+    if (!validateEmail(credentials.email)) {
+      return;
+    }
     try {
       await signup.mutateAsync(credentials);
     } catch (error) {
       console.error("注册失败:", error);
     }
+  };
+  const [emailError, setEmailError] = useState<string>("");
+
+  // 添加邮箱验证函数
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("请输入有效的邮箱地址");
+      return false;
+    }
+    setEmailError("");
+    return true;
   };
 
   return (
@@ -49,9 +65,9 @@ export function SignupForm({
             placeholder="username"
             required
             value={credentials.username}
-            onChange={(e) =>
-              setCredentials({ ...credentials, username: e.target.value })
-            }
+            onChange={(e) => {
+              setCredentials({ ...credentials, username: e.target.value });
+            }}
           />
         </div>
         <div className="grid gap-2">
@@ -62,10 +78,14 @@ export function SignupForm({
             placeholder="email"
             required
             value={credentials.email}
-            onChange={(e) =>
-              setCredentials({ ...credentials, email: e.target.value })
-            }
+            onChange={(e) => {
+              setCredentials({ ...credentials, email: e.target.value });
+            }}
+            onBlur={() => validateEmail(credentials.email)}
           />
+          {emailError && (
+            <span className="text-sm text-red-500">{emailError}</span>
+          )}
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">

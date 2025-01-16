@@ -1,6 +1,7 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 import { QueryClient } from "@tanstack/react-query";
+import { message } from "antd";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,10 +54,14 @@ export const request = {
 
       window.location.href = "/login";
     }
-
-    if (!response.ok) {
-      throw new Error("请求失败");
+    if (data.statusCode >= 400) {
+      message.error(data.message);
+      throw new Error(data.message);
     }
+
+    // if (!response.ok) {
+    //   throw new Error("请求失败");
+    // }
     return data;
   },
 
