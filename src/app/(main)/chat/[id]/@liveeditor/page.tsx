@@ -317,6 +317,9 @@ const LiveEditor = () => {
                 </TooltipContent>
               </Tooltip>
               <PopoverContent>
+                <h3 className="mb-4 text-sm font-medium text-gray-900">
+                  {t("diagram.shareExpireTime")}
+                </h3>
                 <div className="flex items-center gap-2">
                   <Select value={shareTime} onValueChange={setShareTime}>
                     <SelectTrigger>
