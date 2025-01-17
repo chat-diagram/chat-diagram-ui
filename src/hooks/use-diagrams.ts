@@ -22,7 +22,10 @@ export function useGetDiagramsByProjectId(projectId: string) {
   });
 }
 
-export function useGetDiagram(diagramId: string) {
+export function useGetDiagram(
+  diagramId: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ["diagram", diagramId],
     queryFn: () => {
@@ -31,6 +34,7 @@ export function useGetDiagram(diagramId: string) {
       }
       return diagramsApi.getDiagram(diagramId);
     },
+    enabled: options?.enabled !== false, // 默认为 true
   });
 }
 

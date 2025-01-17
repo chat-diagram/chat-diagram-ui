@@ -132,6 +132,26 @@ const SettingDialog = ({
             </Item>
           </div>
         )}
+        {activeTab === "common" && (
+          <div className="px-0">
+            {/* <div className="py-1"> */}
+            <span className="text-xs ml-2 text-foreground/70 ">
+              {t("account.nav.preferences")}
+            </span>
+            {/* </div> */}
+            <Item right={<ModeToggle />}>
+              {/* <div className="flex items-center gap-2 text-sm ml-2"> */}
+              {t("account.nav.theme")}
+              {/* </div> */}
+            </Item>
+            <Separator />
+            <Item right={<LanguageSwitcher />}>
+              {/* <div className="flex items-center gap-2 text-sm ml-2"> */}
+              {t("account.nav.language")}
+              {/* </div> */}
+            </Item>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -258,9 +278,8 @@ export function NavUser({ user }: { user: User }) {
               </DropdownMenuItem> */}
             </DropdownMenuGroup>
 
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {/* <DropdownMenuLabel> */}
               <div className="py-1">
                 <span className="text-xs ml-2 text-foreground/70 ">
                   {t("account.nav.preferences")}
@@ -282,7 +301,7 @@ export function NavUser({ user }: { user: User }) {
                   <LanguageSwitcher />
                 </div>
               </div>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>
               <LogOut />

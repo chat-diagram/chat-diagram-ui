@@ -81,10 +81,10 @@ export function NavProjects({ projects }: { projects: Project[] }) {
                   <Folder className="text-muted-foreground" />
                   <span>{t("project.siderBtn.view")}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                {/* <DropdownMenuItem>
                   <Forward className="text-muted-foreground" />
                   <span>{t("project.siderBtn.share")}</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => deleteProject(item.id)}

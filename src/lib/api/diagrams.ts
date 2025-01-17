@@ -38,6 +38,25 @@ export type CreateDiagramVersionRequest = {
   description: string;
 };
 
+export type ShareExpireTime = "7d" | "15d" | "never";
+
+export type ShareDiagramResponse = {
+  uuid: string;
+  expiresIn: ShareExpireTime;
+};
+
+export type GetShareDiagramResponse = {
+  id: string;
+  title: string;
+  description: string;
+  mermaidCode: string;
+  versionNumber: number;
+  user: {
+    id: string;
+    username: string;
+  };
+};
+
 export const diagramsApi = {
   /**
    * get all diagrams of user
@@ -65,4 +84,8 @@ export const diagramsApi = {
     request.post(`/diagrams/${diagramId}/restore`),
   renameDiagram: (diagramId: string, data: { title: string }) =>
     request.post(`/diagrams/${diagramId}/title`, data),
+  shareDiagram: (diagramId: string, data: { expiration: ShareExpireTime }) =>
+    request.post<ShareDiagramResponse>(`/diagrams/${diagramId}/share`, data),
+  getShareDiagram: (uuid: string) =>
+    request.get<GetShareDiagramResponse>(`/diagrams/shared/${uuid}`),
 };

@@ -1,16 +1,16 @@
 "use client";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { createStyles } from "antd-style";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { usePathname } from "next/navigation";
-import { Diagram, DiagramVersion } from "@/lib/api/diagrams";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { Diagram, diagramsApi, DiagramVersion } from "@/lib/api/diagrams";
 
 const useStyle = createStyles(({ token, css }) => {
   return {
     layout: css`
       width: 100%;
-      min-width: 1000px;
+      // min-width: 1000px;
       // height: 722px;
       height: 100%;
       border-radius: ${token.borderRadius}px;
@@ -105,6 +105,8 @@ interface ChatContextType {
   setActiveDiagramVersion: (version: DiagramVersion | null) => void;
   diagram: Diagram | null;
   setDiagram: (diagram: Diagram) => void;
+  isSharePage: boolean;
+  setIsSharePage: (isSharePage: boolean) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -116,6 +118,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
   const [editorMounted, setEditorMounted] = useState(false);
   const [activeDiagramVersion, setActiveDiagramVersion] = useState(null);
   const [diagram, setDiagram] = useState<Diagram | null>(null);
+  const [isSharePage, setIsSharePage] = useState(false);
 
   const setMermaidCode = (code: string) => {
     function filterMermaidComments(mermaidCode: string) {
@@ -141,6 +144,12 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
     setMermaidCodeOrigin(filteredCode);
   };
 
+  useEffect(() => {
+    if (activeDiagramVersion) {
+      setMermaidCode(activeDiagramVersion.mermaidCode);
+    }
+  }, [activeDiagramVersion]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -156,6 +165,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setActiveDiagramVersion,
         diagram,
         setDiagram,
+        isSharePage,
+        setIsSharePage,
       }}
     >
       {children}
@@ -183,10 +194,30 @@ const Layout = ({
   if (pathname?.includes("/projects")) {
     // redirect(pathname);
   }
-  // const params = useParams();
-  // const { id } = params;
-  const { showRightPanel, setShowRightPanel } = useChatContext();
+  const params = useParams();
+  const { id } = params;
+  const {
+    showRightPanel,
+    setShowRightPanel,
+    setIsSharePage,
+    isSharePage,
+    setActiveDiagramVersion,
+    activeDiagramVersion,
+  } = useChatContext();
 
+  const [sharedDiagram, setSharedDiagram] = useState<Diagram | null>(null);
+
+  useEffect(() => {
+    const getShareDiagram = async () => {
+      const isSharePage = searchParams.get("share") === "true";
+      if (!isSharePage) return;
+      const res: unknown = await diagramsApi.getShareDiagram(id as string);
+      // debugger;
+      setActiveDiagramVersion(res as DiagramVersion);
+      setSharedDiagram(res as DiagramVersion);
+    };
+    getShareDiagram();
+  }, [isSharePage]);
   // ==================== Style ====================
   const { styles } = useStyle();
 
@@ -214,24 +245,37 @@ const Layout = ({
     );
   };
 
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const isSharePage = searchParams.get("share");
+    if (isSharePage === "true") {
+      setIsSharePage(true);
+    }
+  }, [searchParams, setIsSharePage]);
+
   // ==================== Nodes ====================
 
   // ==================== Render =================
   return (
     <div className={styles.layout}>
       <PanelGroup direction="horizontal" className="w-full h-full">
-        <Panel
-          minSize={30}
-          className="flex flex-col "
-          style={{ maxHeight: "100vh" }}
-        >
-          {chat}
-        </Panel>
-        <PanelResizeHandleWithStyle
-          onClick={() => {
-            setShowRightPanel(!showRightPanel);
-          }}
-        />
+        {Boolean(!isSharePage) && (
+          <>
+            <Panel
+              minSize={30}
+              className="flex flex-col "
+              style={{ maxHeight: "100vh" }}
+            >
+              {chat}
+            </Panel>
+            <PanelResizeHandleWithStyle
+              onClick={() => {
+                setShowRightPanel(!showRightPanel);
+              }}
+            />
+          </>
+        )}
         {/* <Panel>
           <PanelGroup direction="vertical">
             <Panel>top</Panel>
@@ -248,7 +292,6 @@ const Layout = ({
           </PanelGroup>
         </Panel>
         <PanelResizeHandleWithStyle /> */}
-
         {showRightPanel && (
           <Panel minSize={30} style={{ minWidth: "400px" }}>
             {liveEditor}

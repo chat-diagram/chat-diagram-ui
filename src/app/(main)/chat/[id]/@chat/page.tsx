@@ -82,7 +82,11 @@ const Independent: React.FC = () => {
   // const
   const { id } = useParams();
   // console.log("leilei", params);
-  const { data: diagramsData } = useGetDiagram(id as string);
+
+  const isSharePage = searchParams.get("share") === "true";
+  const { data: diagramsData } = useGetDiagram(id as string, {
+    enabled: !isSharePage,
+  });
   // 在需要使用数据的地方进行条件判断
   const diagrams = id !== "new" ? diagramsData : null;
 
@@ -218,6 +222,8 @@ const Independent: React.FC = () => {
   }, [queryDescription, queryProjectId]);
 
   useEffect(() => {
+    const isSharePage = searchParams.get("share") === "true";
+    if (isSharePage) return;
     const messages: MessageInfo<string>[] = [];
     diagrams?.versions.forEach((version, index) => {
       messages.push({
@@ -300,7 +306,7 @@ const Independent: React.FC = () => {
                     diagramId: id as string,
                   }
                 );
-                setMermaidCode(mermaidCode);
+                // setMermaidCode(mermaidCode);
                 setShowRightPanel(true);
               }}
               // hoverable

@@ -243,7 +243,10 @@ export default function BillingHistory() {
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
           <p>{t("payment.billings.helpTips")}</p>
           {/* todo */}
-          <p>{t("payment.billings.helpInfo")}</p>
+          <p>
+            {t("payment.billings.helpInfoEmail")} kayshen_xu@163.com |
+            wangleinaldo@gmail.com
+          </p>
         </div>
       </div>
     </div>
