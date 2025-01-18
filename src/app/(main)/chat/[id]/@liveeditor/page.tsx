@@ -389,7 +389,7 @@ const LiveEditor = () => {
         } flex-1 overflow-auto`}
       >
         <div
-          className={`mermaid-preview-container w-full h-full p-4  ${
+          className={`mermaid-preview-container w-full h-full p-4 flex justify-center ${
             isError ? "opacity-50" : ""
           }`}
           dangerouslySetInnerHTML={{ __html: mermaidContent }}
