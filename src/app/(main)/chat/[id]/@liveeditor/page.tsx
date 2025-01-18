@@ -169,7 +169,7 @@ const LiveEditor = () => {
     return () => {
       mediaQuery.removeEventListener("change", themeChangeHandler);
     };
-  }, [nextTheme, mermaidCode]);
+  }, [nextTheme]);
 
   useEffect(() => {
     renderMermaid(mermaidCode);
