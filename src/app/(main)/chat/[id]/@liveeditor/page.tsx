@@ -317,7 +317,7 @@ const LiveEditor = () => {
                 </TooltipContent>
               </Tooltip>
               <PopoverContent>
-                <h3 className="mb-4 text-sm font-medium text-gray-900">
+                <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">
                   {t("diagram.shareExpireTime")}
                 </h3>
                 <div className="flex items-center gap-2">
@@ -385,7 +385,7 @@ const LiveEditor = () => {
       </div>
       <div
         className={`${
-          activeTab === "preview" ? "block" : "hidden"
+          activeTab === "preview" ? "block" : "invisible"
         } flex-1 overflow-auto`}
       >
         <div
