@@ -7,6 +7,7 @@ import "@ant-design/v5-patch-for-react-19";
 
 import "./(main)/globals.css";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   icons: {
@@ -23,18 +24,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <I18nProvider>
-          <QueryProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <AuthGuard>{children}</AuthGuard>
-            </ThemeProvider>
-          </QueryProvider>
-        </I18nProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <I18nProvider>
+            <QueryProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <AuthGuard>{children}</AuthGuard>
+              </ThemeProvider>
+            </QueryProvider>
+          </I18nProvider>
+        </Suspense>
       </body>
     </html>
   );
