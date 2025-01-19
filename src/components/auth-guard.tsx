@@ -13,7 +13,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const isShare = searchParams.get("share");
-    const isPublicPath = publicPaths.includes(pathname || "") || isShare;
+    const isPublicPath = publicPaths.includes(pathname || "");
+    if (isShare) {
+      return;
+    }
     if (!token && !isPublicPath) {
       router.push("/login");
     } else if (token && isPublicPath) {

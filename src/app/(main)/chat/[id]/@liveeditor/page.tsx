@@ -126,14 +126,17 @@ const LiveEditor = () => {
         finalTheme = nextTheme === "dark" ? "dark" : "default";
       }
     };
-    // 在组件挂载后初始化 mermaid
-    const init = () => {
-      updateTheme();
+    const initializeMermaid = () => {
       mermaid.initialize({
         startOnLoad: true,
         securityLevel: "loose",
         theme: finalTheme,
       });
+    };
+    // 在组件挂载后初始化 mermaid
+    const init = () => {
+      updateTheme();
+      initializeMermaid();
 
       console.log("mermaid初始化完成");
 
@@ -151,11 +154,7 @@ const LiveEditor = () => {
       //   theme: finalTheme,
       // });
       updateTheme();
-      mermaid.initialize({
-        startOnLoad: true,
-        securityLevel: "loose",
-        theme: finalTheme,
-      });
+      initializeMermaid();
       // todo 这里获取不到mermaidCode，不知道为什么  render才能把theme的变化也应用上
       if (mermaidCode) {
         renderMermaid(mermaidCode);
