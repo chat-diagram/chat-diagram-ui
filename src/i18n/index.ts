@@ -93,6 +93,7 @@ const resources = {
         never: "Never",
         downloadPNG: "Download",
         shareExpireTime: "Select Share Expire Time",
+        copySuccess: "Copied",
       },
       welcome: "Welcome to Chat Diagram",
       features: {
@@ -262,6 +263,7 @@ const resources = {
         never: "永久",
         downloadPNG: "下载",
         shareExpireTime: "选择分享有效期",
+        copySuccess: "已复制",
       },
       welcome: "欢迎使用 Chat Diagram",
       features: {

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { Diagram, diagramsApi, DiagramVersion } from "@/lib/api/diagrams";
+import { EditorState } from "@/types/editor";
 
 const useStyle = createStyles(({ token, css }) => {
   return {
@@ -107,6 +108,8 @@ interface ChatContextType {
   setDiagram: (diagram: Diagram) => void;
   isSharePage: boolean;
   setIsSharePage: (isSharePage: boolean) => void;
+  editorState: EditorState;
+  setEditorState: (state: EditorState) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -119,6 +122,9 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
   const [activeDiagramVersion, setActiveDiagramVersion] = useState(null);
   const [diagram, setDiagram] = useState<Diagram | null>(null);
   const [isSharePage, setIsSharePage] = useState(false);
+  const [editorState, setEditorState] = useState<EditorState>({
+    rough: true,
+  });
 
   const setMermaidCode = (code: string) => {
     function filterMermaidComments(mermaidCode: string) {
@@ -167,6 +173,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setDiagram,
         isSharePage,
         setIsSharePage,
+        editorState,
+        setEditorState,
       }}
     >
       {children}

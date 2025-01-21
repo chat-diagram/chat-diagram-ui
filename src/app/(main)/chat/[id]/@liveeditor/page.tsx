@@ -38,15 +38,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { downloadSvgAsPng } from "@/lib/utils";
-import { LatestVersionBadge, RollbackVersionBadge } from "./components";
+import {
+  DownloadButton,
+  LatestVersionBadge,
+  RollbackVersionBadge,
+} from "./components";
+import { Svg2Roughjs } from "svg2roughjs";
+import { PreviewToolbar } from "./components/preview-toobar";
+import { CodeEditorToolbar } from "./components/code-editor-toolbar";
 
 const LiveEditor = () => {
   const t = useI18n();
+  const {
+    mermaidCode,
+    setMermaidCode,
+    setShowRightPanel,
+    setActiveDiagramVersion,
+    activeDiagramVersion,
+    isSharePage,
+    editorState,
+    setEditorState,
+  } = useChatContext();
 
   const [activeTab, setActiveTab] = useState("preview");
   // 初始化 mermaid
   // 添加状态来存储 mermaid 图表内容
   const [mermaidContent, setMermaidContent] = useState("");
+
   //   const [lastSuccessfulContent, setLastSuccessfulContent] = useState(""); // 最后一次成功的内容
 
   const [isError, setIsError] = useState(false);
@@ -57,10 +75,51 @@ const LiveEditor = () => {
     try {
       // 先验证语法
       await mermaid.parse(code);
-
-      // 语法正确才进行渲染
+      // // 语法正确才进行渲染
       const result = await mermaid.render("mermaid-preview", code);
-      setMermaidContent(result.svg);
+      console.log("result", document.getElementById("mermaid-preview"));
+
+      const container = document.getElementById("mermaid-preview-container")!;
+
+      container.innerHTML = result.svg;
+
+      const graphDiv =
+        document.querySelector<SVGSVGElement>("#mermaid-preview")!;
+      if (editorState.rough) {
+        // debugger;
+        // setMermaidContent(result.svg);
+
+        // // 创建一个临时的 div 来解析 SVG 字符串
+        // const tempDiv = document.createElement("div");
+        // tempDiv.innerHTML = result.svg;
+        // const graphDiv = tempDiv.querySelector("svg");
+        const svg2roughjs = new Svg2Roughjs("#mermaid-preview-container");
+        // if (!svg2roughjs.svg) {
+        //   throw new Error("svg2roughjs.svg is null");
+        // }
+        svg2roughjs.svg = graphDiv;
+        await svg2roughjs.sketch();
+        graphDiv.remove();
+        const sketch = document.querySelector<HTMLElement>(
+          "#mermaid-preview-container > svg"
+        );
+        if (!sketch) {
+          throw new Error("sketch not found");
+        }
+        const height = sketch.getAttribute("height");
+        const width = sketch.getAttribute("width");
+        sketch.setAttribute("height", "100%");
+        sketch.setAttribute("width", "100%");
+        sketch.setAttribute("id", "mermaid-preview");
+        sketch.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        sketch.style.maxWidth = "100%";
+      } else {
+        graphDiv.setAttribute("height", "100%");
+        graphDiv.style.maxWidth = "100%";
+        // if (bindFunctions) {
+        //   bindFunctions(graphDiv);
+        // }
+      }
       setIsError(false);
     } catch (error) {
       console.log("Mermaid 渲染错误:", error);
@@ -77,14 +136,6 @@ const LiveEditor = () => {
   const diagram = queryClient.getQueryData<Diagram>(["diagram", id]);
   const versionLength = diagram?.versions.length;
   console.log("diagram", diagram);
-  const {
-    mermaidCode,
-    setMermaidCode,
-    setShowRightPanel,
-    setActiveDiagramVersion,
-    activeDiagramVersion,
-    isSharePage,
-  } = useChatContext();
 
   const handlePreviousVersion = () => {
     // if (activeDiagramVersion?.versionNumber) {
@@ -173,6 +224,11 @@ const LiveEditor = () => {
   useEffect(() => {
     renderMermaid(mermaidCode);
   }, [mermaidCode]);
+
+  useEffect(() => {
+    renderMermaid(mermaidCode);
+  }, [editorState]);
+
   const handleEditorDidMount = () => {
     if (mermaidCode) {
       renderMermaid(mermaidCode);
@@ -281,7 +337,6 @@ const LiveEditor = () => {
               <Separator orientation="vertical" className="h-4" />
             </>
           )}
-
           {/* 分享 */}
           {!isSharePage && (
             <Popover open={showDownLoad} onOpenChange={setShowDownLoad}>
@@ -299,14 +354,6 @@ const LiveEditor = () => {
                         <Share
                           className={`w-4 h-4 transition-all duration-300 `}
                         />
-
-                        {/* <Check
-                        className={`w-4 h-4 absolute text-green-500 transition-all duration-300 ${
-                          shareIconState === "success"
-                            ? "opacity-100"
-                            : "opacity-0"
-                        }`}
-                      /> */}
                       </div>
                     </Button>
                   </PopoverTrigger>
@@ -358,21 +405,14 @@ const LiveEditor = () => {
             </Popover>
           )}
           {/* 下载 */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="h5" variant="ghost" onClick={handleDownloadPNG}>
-                <Download className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("diagram.downloadPNG")}</p>
-            </TooltipContent>
-          </Tooltip>
+          <DownloadButton handleDownloadPNG={handleDownloadPNG} />
         </div>
       </div>
+      {/* tab-code */}
       <div
         className={`w-full h-full ${activeTab === "code" ? "block" : "hidden"}`}
       >
+        <CodeEditorToolbar />
         <MonacoEditor
           value={mermaidCode}
           onChange={handleCodeChange}
@@ -382,22 +422,27 @@ const LiveEditor = () => {
           onMount={handleEditorDidMount}
         />
       </div>
+      {/* tab-preview */}
       <div
         className={`${
           activeTab === "preview" ? "block" : "invisible"
         } flex-1 overflow-auto`}
       >
-        <div
-          className={`mermaid-preview-container w-full h-full p-4 flex justify-center ${
-            isError ? "opacity-50" : ""
-          }`}
-          dangerouslySetInnerHTML={{ __html: mermaidContent }}
-        ></div>
-        {isError && (
-          <div className="text-red-500 text-sm p-2">
-            {t("diagram.syntaxError")}
-          </div>
-        )}
+        <div className="flex flex-col h-full">
+          <PreviewToolbar />
+          <div
+            id="mermaid-preview-container"
+            className={`mermaid-preview-container w-full h-full p-4 flex justify-center ${
+              isError ? "opacity-50" : ""
+            }`}
+            // dangerouslySetInnerHTML={{ __html: mermaidContent }}
+          ></div>
+          {isError && (
+            <div className="text-red-500 text-sm p-2">
+              {t("diagram.syntaxError")}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

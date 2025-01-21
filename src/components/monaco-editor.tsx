@@ -10,7 +10,7 @@ interface MonacoEditorProps {
   value?: string;
   onChange?: (value: string) => void;
   language?: string;
-  theme?: "vs-dark" | "light";
+  theme?: "vs-dark" | "light" | "mermaid-dark";
   height?: string | number;
   onMount: (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 }
@@ -19,7 +19,7 @@ const MonacoEditor = ({
   value = "",
   onChange,
   language = "mermaid",
-  theme = "vs-dark",
+  theme = "mermaid-dark",
   height = "500px",
   onMount,
 }: MonacoEditorProps) => {
@@ -29,23 +29,23 @@ const MonacoEditor = ({
   // 添加新的 useEffect 来处理主题切换
   let finalTheme = nextTheme;
 
-  useEffect(() => {
-    const updateTheme = () => {
-      if (nextTheme === "system") {
-        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-          finalTheme = "vs-dark";
-        } else {
-          finalTheme = "light";
-        }
+  const updateTheme = () => {
+    if (nextTheme === "system") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        finalTheme = "mermaid-dark";
       } else {
-        finalTheme = nextTheme === "dark" ? "vs-dark" : "light";
+        finalTheme = "light";
       }
+    } else {
+      finalTheme = nextTheme === "dark" ? "mermaid-dark" : "light";
+    }
 
-      if (editorRef.current) {
-        editorRef.current.updateOptions({ theme: finalTheme });
-      }
-    };
-
+    if (editorRef.current) {
+      editorRef.current.updateOptions({ theme: finalTheme });
+    }
+  };
+  updateTheme();
+  useEffect(() => {
     // 初始化主题
     updateTheme();
 
@@ -86,19 +86,21 @@ const MonacoEditor = ({
     }
   }, [value]);
   return (
-    <Editor
-      height={height}
-      defaultLanguage={language}
-      defaultValue={value}
-      theme={theme}
-      onChange={(value) => onChange?.(value ?? "")}
-      onMount={handleEditorDidMount}
-      options={{
-        automaticLayout: true,
-        wordWrap: "on",
-        scrollBeyondLastLine: false,
-      }}
-    />
+    <>
+      <Editor
+        height={height}
+        defaultLanguage={language}
+        defaultValue={value}
+        theme={theme}
+        onChange={(value) => onChange?.(value ?? "")}
+        onMount={handleEditorDidMount}
+        options={{
+          automaticLayout: true,
+          wordWrap: "on",
+          scrollBeyondLastLine: false,
+        }}
+      />
+    </>
   );
 };
 
