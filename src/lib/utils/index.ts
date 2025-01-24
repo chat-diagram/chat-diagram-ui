@@ -5,6 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const simulateDownload = (download: string, href: string): void => {
+  const a = document.createElement("a");
+  a.download = download;
+  a.href = href;
+  a.click();
+  a.remove();
+};
+
 export function downloadSvgAsPng(
   svgElement: HTMLElement,
   filename = "image.png"

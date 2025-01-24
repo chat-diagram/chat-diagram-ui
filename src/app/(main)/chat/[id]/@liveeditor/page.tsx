@@ -2,11 +2,15 @@
 import MonacoEditor from "@/components/monaco-editor";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mermaid from "mermaid";
+import { waitForRender } from "@/lib/utils/autoSync";
+import dayjs from "@/lib/utils/dayjs";
+import { toBase64 } from "js-base64";
 import { useEffect, useState } from "react";
 import { useChatContext } from "../layout";
 import {
   Check,
   ChevronsRight,
+  Copy,
   Download,
   Redo2,
   Share,
@@ -37,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { downloadSvgAsPng } from "@/lib/utils";
+import { downloadSvgAsPng, simulateDownload } from "@/lib/utils";
 import {
   DownloadButton,
   LatestVersionBadge,
@@ -46,6 +50,9 @@ import {
 import { Svg2Roughjs } from "svg2roughjs";
 import { PreviewToolbar } from "./components/preview-toobar";
 import { CodeEditorToolbar } from "./components/code-editor-toolbar";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const LiveEditor = () => {
   const t = useI18n();
@@ -108,13 +115,13 @@ const LiveEditor = () => {
         }
         const height = sketch.getAttribute("height");
         const width = sketch.getAttribute("width");
-        sketch.setAttribute("height", "100%");
-        sketch.setAttribute("width", "100%");
+        // sketch.setAttribute("height", "100%");
+        sketch.setAttribute("max-width", "100%");
         sketch.setAttribute("id", "mermaid-preview");
         sketch.setAttribute("viewBox", `0 0 ${width} ${height}`);
         sketch.style.maxWidth = "100%";
       } else {
-        graphDiv.setAttribute("height", "100%");
+        // graphDiv.setAttribute("height", "100%");
         graphDiv.style.maxWidth = "100%";
         // if (bindFunctions) {
         //   bindFunctions(graphDiv);
@@ -263,7 +270,8 @@ const LiveEditor = () => {
       }, 2000);
     });
   };
-
+  const getFileName = (extension: string) =>
+    `chat-diagram-${dayjs().format("YYYY-MM-DD-HHmmss")}.${extension}`;
   const handleDownloadPNG = () => {
     const svgElement = document.getElementById("mermaid-preview");
     if (!svgElement) {
@@ -272,8 +280,150 @@ const LiveEditor = () => {
     }
     downloadSvgAsPng(svgElement, "mermaid-diagram.png");
   };
+  const getSvgElement = () => {
+    const svgElement = document
+      .querySelector("#mermaid-preview-container svg")
+      ?.cloneNode(true) as HTMLElement;
+    svgElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    return svgElement;
+  };
+  const getBase64SVG = (
+    svg?: HTMLElement,
+    width?: number,
+    height?: number
+  ): string => {
+    if (svg) {
+      // Prevents the SVG size of the interface from being changed
+      svg = svg.cloneNode(true) as HTMLElement;
+    }
+    // 添加字体样式
+    const style = document.createElement("style");
+    style.textContent = `
+    @font-face {
+      font-family: 'Your-Font';
+      src: url('your-font.woff2') format('woff2');
+    }
+  `;
+    svg?.insertBefore(style, svg.firstChild);
 
+    // 确保正确的viewBox
+    height && svg?.setAttribute("height", `${height}px`);
+    width && svg?.setAttribute("width", `${width}px`); // Workaround https://stackoverflow.com/questions/28690643/firefox-error-rendering-an-svg-image-to-html5-canvas-with-drawimage
+    svg?.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    if (!svg) {
+      svg = getSvgElement();
+    }
+    const svgString = svg.outerHTML
+      .replaceAll("<br>", "<br/>")
+      .replaceAll(/<img([^>]*)>/g, (m, g: string) => `<img ${g} />`);
+
+    //     return toBase64(`<?xml version="1.0" encoding="UTF-8"?>
+    // <?xml-stylesheet href="${FONT_AWESOME_URL}" type="text/css"?>
+    // ${svgString}`);
+    return toBase64(`<?xml version="1.0" encoding="UTF-8"?>
+  ${svgString}`);
+  };
+  const onDownloadSVG = () => {
+    simulateDownload(
+      getFileName("svg"),
+      `data:image/svg+xml;base64,${getBase64SVG()}`
+    );
+  };
+  const downloadImage: Exporter = (context, image) => {
+    return () => {
+      const { canvas } = context;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      simulateDownload(
+        getFileName("png"),
+        canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+      );
+    };
+  };
+  const onDownloadPNG = async (event: Event) => {
+    // handleDownloadPNG();
+    await exportImage(event, downloadImage);
+  };
+  type Exporter = (
+    context: CanvasRenderingContext2D,
+    image: HTMLImageElement
+  ) => () => void;
+
+  const clipboardCopy: Exporter = (context, image) => {
+    return () => {
+      const { canvas } = context;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        try {
+          if (!blob) {
+            throw new Error("blob is empty");
+          }
+          void navigator.clipboard.write([
+            new ClipboardItem({
+              [blob.type]: blob,
+            }),
+          ]);
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    };
+  };
+  const exportImage = async (event: Event, exporter: Exporter) => {
+    await waitForRender();
+    // if (document.querySelector(".outOfSync")) {
+    //   throw new Error("Diagram is out of sync");
+    // }
+    const canvas: HTMLCanvasElement = document.createElement("canvas");
+    const svg = document.querySelector<HTMLElement>("#mermaid-preview");
+    if (!svg) {
+      throw new Error("svg not found");
+    }
+    const box: DOMRect = svg.getBoundingClientRect();
+    canvas.width = box.width;
+    canvas.height = box.height;
+    const userimagesize = 1080;
+    if (imagemodeselected === "width") {
+      const ratio = box.height / box.width;
+      canvas.width = userimagesize;
+      canvas.height = userimagesize * ratio;
+    } else if (imagemodeselected === "height") {
+      const ratio = box.width / box.height;
+      canvas.width = userimagesize * ratio;
+      canvas.height = userimagesize;
+    }
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("context not found");
+    }
+    // context.fillStyle = `hsl(${window
+    //   .getComputedStyle(document.body)
+    //   .getPropertyValue("--b1")})`;
+    // context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const image = new Image();
+    image.addEventListener("load", exporter(context, image));
+    image.src = `data:image/svg+xml;base64,${getBase64SVG(
+      svg,
+      canvas.width,
+      canvas.height
+    )}`;
+
+    event.stopPropagation();
+    event.preventDefault();
+  };
+
+  const onCopyClipboard = async (event: Event) => {
+    await exportImage(event, clipboardCopy);
+  };
+
+  const [showShare, setShowShare] = useState(false);
   const [showDownLoad, setShowDownLoad] = useState(false);
+
+  const [imagemodeselected, setImagemodeselected] = useState<
+    "autosize" | "width" | "height"
+  >("autosize");
+  const [userimagesize, setUserimagesize] = useState(1080);
   return (
     <div className="flex flex-col h-screen" style={{ minWidth: "400px" }}>
       <div className="w-full p-1 border-b  flex items-center gap-2">
@@ -339,7 +489,7 @@ const LiveEditor = () => {
           )}
           {/* 分享 */}
           {!isSharePage && (
-            <Popover open={showDownLoad} onOpenChange={setShowDownLoad}>
+            <Popover open={showShare} onOpenChange={setShowShare}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <PopoverTrigger asChild>
@@ -347,7 +497,7 @@ const LiveEditor = () => {
                       size="h5"
                       variant="ghost"
                       onClick={() => {
-                        setShowDownLoad(true);
+                        setShowShare(true);
                       }}
                     >
                       <div className={"w-4 h-4"}>
@@ -405,7 +555,100 @@ const LiveEditor = () => {
             </Popover>
           )}
           {/* 下载 */}
-          <DownloadButton handleDownloadPNG={handleDownloadPNG} />
+          {/* <DownloadButton handleDownloadPNG={handleDownloadPNG} /> */}
+          {/* <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="h5" variant="ghost" onClick={handleDownloadPNG}>
+                <Download className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("diagram.downloadPNG")}</p>
+            </TooltipContent>
+          </Tooltip> */}
+          <Popover open={showDownLoad} onOpenChange={setShowDownLoad}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    size="h5"
+                    variant="ghost"
+                    onClick={() => {
+                      setShowDownLoad(true);
+                    }}
+                  >
+                    <div className={"w-4 h-4"}>
+                      <Download className="w-4 h-4" />
+                    </div>
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("diagram.export")}</p>
+              </TooltipContent>
+            </Tooltip>
+            <PopoverContent
+              className="flex flex-col gap-2 "
+              style={{ minWidth: 400 }}
+            >
+              {/* <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">
+                {t("diagram.shareExpireTime")}
+              </h3> */}
+              <div className="flex items-center gap-2">
+                <Button
+                  className="action-btn w-full"
+                  variant="outline"
+                  onClick={onCopyClipboard}
+                >
+                  <Copy /> {t("diagram.exportCopy")}
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  className="action-btn w-full"
+                  variant="outline"
+                  onClick={() => onDownloadPNG()}
+                >
+                  <Download /> Png
+                </Button>
+                <Button
+                  variant="outline"
+                  className="action-btn w-full"
+                  onClick={() => onDownloadSVG()}
+                >
+                  <Download /> Svg
+                </Button>
+              </div>
+              <div>
+                <div className="whitespace-nowrap">PNG size</div>
+
+                <RadioGroup
+                  value={imagemodeselected}
+                  onValueChange={setImagemodeselected}
+                  className="flex items-center gap-2 h-8"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="autosize" id="r1" />
+                    <Label htmlFor="r1">Auto</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="width" id="r2" />
+                    <Label htmlFor="r2">Width</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="height" id="r3" />
+                    <Label htmlFor="r3">Height</Label>
+                  </div>
+                  {imagemodeselected !== "autosize" && (
+                    <Input
+                      value={userimagesize}
+                      onChange={(e) => setUserimagesize(Number(e.target.value))}
+                    />
+                  )}
+                </RadioGroup>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       {/* tab-code */}
