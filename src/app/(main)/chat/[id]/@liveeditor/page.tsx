@@ -381,7 +381,6 @@ const LiveEditor = () => {
     const box: DOMRect = svg.getBoundingClientRect();
     canvas.width = box.width;
     canvas.height = box.height;
-    const userimagesize = 1080;
     if (imagemodeselected === "width") {
       const ratio = box.height / box.width;
       canvas.width = userimagesize;
