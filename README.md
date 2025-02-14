@@ -1,5 +1,3 @@
-
-
 # Chat Diagram
 
 Chat Diagram 是一个基于 AI 的图表生成工具,可以通过自然语言对话快速生成各类图表。
@@ -48,13 +46,43 @@ pnpm install
 3. 配置环境变量
 
 复制 `.env.example` 文件并重命名为 `.env`:
-```
+```bash
 cp .env.example .env
 ```
 4. 启动开发环境
 ```bash
 pnpm dev
 ```
-访问 http://localhost:3005 查看应用。
+访问 http://localhost:3001 查看应用。
+
+## Docker 部署
+
+1. 构建镜像
+```bash
+# 使用 buildx 构建多平台镜像
+docker buildx create --name mybuilder --driver docker-container --bootstrap
+docker buildx use mybuilder
+docker buildx build --platform linux/amd64 -t yourusername/chat-diagram:latest --push .
+```
+
+2. 运行容器
+```bash
+docker run -d -p 3001:3001 yourusername/chat-diagram:latest
+```
+
+## 环境变量
+
+| 变量名 | 描述 | 默认值 |
+|--------|------|---------|
+| `NEXT_PUBLIC_API_BASE_URL` | API 基础地址 | https://chat-api.ioa.tech |
+| `PORT` | 应用运行端口 | 3001 |
+
+## 贡献指南
+
+欢迎提交 Pull Request 和 Issue！
+
+## 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
 
 
