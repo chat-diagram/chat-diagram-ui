@@ -79,9 +79,7 @@ const Independent: React.FC = () => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  // const
   const { id } = useParams();
-  // console.log("leilei", params);
 
   const isSharePage = searchParams.get("share") === "true";
   const { data: diagramsData } = useGetDiagram(id as string, {
@@ -98,7 +96,6 @@ const Independent: React.FC = () => {
   // ==================== Runtime ====================
   const [agent] = useXAgent({
     request: async ({ message }, { onUpdate, onSuccess, onError }) => {
-      console.log("message", message);
       await generateMermaidCode(
         message as string,
         onUpdate,
@@ -111,7 +108,6 @@ const Independent: React.FC = () => {
   const { onRequest, messages, setMessages } = useXChat({
     agent,
   });
-  console.log("messages", messages);
 
   const { showRightPanel, setShowRightPanel } = useChatContext();
   // ==================== Event ====================
@@ -125,8 +121,6 @@ const Independent: React.FC = () => {
   const queryProjectId = searchParams.get("pid");
   const queryDescription = searchParams.get("d");
   const queryProjectTitle = searchParams.get("title");
-  console.log("queryDescription", queryDescription);
-  console.log("queryProjectId", queryProjectId);
 
   // 处理刚创建的情况
   useEffect(() => {

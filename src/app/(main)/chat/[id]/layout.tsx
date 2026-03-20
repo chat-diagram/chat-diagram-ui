@@ -110,6 +110,8 @@ interface ChatContextType {
   setIsSharePage: (isSharePage: boolean) => void;
   editorState: EditorState;
   setEditorState: (state: EditorState) => void;
+  selected: Set<string>;
+  setSelected: (selected: Set<string> | (() => Set<string>)) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -123,9 +125,9 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
   const [diagram, setDiagram] = useState<Diagram | null>(null);
   const [isSharePage, setIsSharePage] = useState(false);
   const [editorState, setEditorState] = useState<EditorState>({
-    rough: true,
+    rough: false,
   });
-
+  const [selected, setSelected] = useState(new Set());
   const setMermaidCode = (code: string) => {
     function filterMermaidComments(mermaidCode: string) {
       /**
@@ -175,6 +177,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setIsSharePage,
         editorState,
         setEditorState,
+        selected,
+        setSelected,
       }}
     >
       {children}
@@ -220,7 +224,6 @@ const Layout = ({
       const isSharePage = searchParams.get("share") === "true";
       if (!isSharePage) return;
       const res: unknown = await diagramsApi.getShareDiagram(id as string);
-      // debugger;
       setActiveDiagramVersion(res as DiagramVersion);
       setSharedDiagram(res as DiagramVersion);
     };

@@ -24,7 +24,6 @@ export const CodeEditorToolbar = () => {
           </Button>
         </div>
       </div>
-      {/* <Separator /> */}
     </>
   );
 };

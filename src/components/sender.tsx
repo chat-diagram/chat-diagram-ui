@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import Link from "next/link";
 import { Button as CustomButtom } from "./ui/button";
 import { useI18n } from "@/i18n";
+import { useChatContext } from "@/app/(main)/chat/[id]/layout";
 
 export const CustomSender = ({
   content,
@@ -22,6 +23,7 @@ export const CustomSender = ({
   setLoading: (loading: boolean) => void;
   onEnhance: () => void;
 }) => {
+  const { selected } = useChatContext();
   const [showUpgrade, setShowUpgrade] = React.useState(true);
   const t = useI18n();
   const enhanceNode = (
@@ -41,6 +43,25 @@ export const CustomSender = ({
         <TooltipContent>{t("sender.enhanceTool")}</TooltipContent>
       </Tooltip>
     </Badge>
+  );
+  const prefixNode = (
+    <div className="flex items-center gap-2">
+      {enhanceNode}
+      <span className="text-sm font-medium text-gray-900">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-sm font-medium text-gray-900">
+              {selected.size > 0 ? `${selected.size} nodes selected` : ""}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="flex flex-col gap-2">
+            {Array.from(selected).map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </TooltipContent>
+        </Tooltip>
+      </span>
+    </div>
   );
 
   return (
@@ -83,24 +104,12 @@ export const CustomSender = ({
           // header={headerNode}
           onSubmit={onSubmit}
           onChange={setContent}
-          prefix={enhanceNode}
+          prefix={prefixNode}
           loading={loading}
           onCancel={() => {
             setLoading(false);
           }}
           readOnly={loading}
-          //   allowSpeech={
-          //     loading
-          //       ? false
-          //       : {
-          //           // When setting `recording`, the built-in speech recognition feature will be disabled
-          //           recording,
-          //           onRecordingChange: (nextRecording) => {
-          //             message.info(`Mock Customize Recording: ${nextRecording}`);
-          //             setRecording(nextRecording);
-          //           },
-          //         }
-          //   }
           style={{
             width: "100%",
             borderRadius: "0.5rem",

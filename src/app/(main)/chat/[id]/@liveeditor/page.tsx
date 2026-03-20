@@ -53,6 +53,7 @@ import { CodeEditorToolbar } from "./components/code-editor-toolbar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import DiagramCanvas from "./components/diagram-canvas";
 
 const LiveEditor = () => {
   const t = useI18n();
@@ -68,9 +69,8 @@ const LiveEditor = () => {
   } = useChatContext();
 
   const [activeTab, setActiveTab] = useState("preview");
-  // 初始化 mermaid
-  // 添加状态来存储 mermaid 图表内容
-  const [mermaidContent, setMermaidContent] = useState("");
+  // 存储mermaid的svg内容
+  const [svgContent, setSvgContent] = useState("");
 
   //   const [lastSuccessfulContent, setLastSuccessfulContent] = useState(""); // 最后一次成功的内容
 
@@ -83,54 +83,51 @@ const LiveEditor = () => {
       // 先验证语法
       await mermaid.parse(code);
       // // 语法正确才进行渲染
-      const result = await mermaid.render("mermaid-preview", code);
+      const result = await mermaid.render(`mermaid-${Date.now()}`, code);
       console.log("result", document.getElementById("mermaid-preview"));
-
-      const container = document.getElementById("mermaid-preview-container")!;
-
-      container.innerHTML = result.svg;
-
+      setSvgContent(result.svg);
       const graphDiv =
         document.querySelector<SVGSVGElement>("#mermaid-preview")!;
       if (editorState.rough) {
-        // debugger;
-        // setMermaidContent(result.svg);
+        const tempContainer = document.createElement("div");
+        tempContainer.style.position = "absolute";
+        tempContainer.style.left = "-9999px";
+        tempContainer.id = "temp-rough-container";
+        document.body.appendChild(tempContainer);
 
-        // // 创建一个临时的 div 来解析 SVG 字符串
-        // const tempDiv = document.createElement("div");
-        // tempDiv.innerHTML = result.svg;
-        // const graphDiv = tempDiv.querySelector("svg");
-        const svg2roughjs = new Svg2Roughjs("#mermaid-preview-container");
-        // if (!svg2roughjs.svg) {
-        //   throw new Error("svg2roughjs.svg is null");
-        // }
-        svg2roughjs.svg = graphDiv;
+        tempContainer.innerHTML = result.svg;
+        const originalSvg = tempContainer.querySelector("svg");
+
+        // 保存原始文字节点
+        const textNodes = originalSvg.querySelectorAll("text");
+        const savedTexts = Array.from(textNodes).map((t) => t.cloneNode(true));
+
+        const svg2roughjs = new Svg2Roughjs("#temp-rough-container");
+        svg2roughjs.svg = originalSvg;
         await svg2roughjs.sketch();
-        graphDiv.remove();
-        const sketch = document.querySelector<HTMLElement>(
-          "#mermaid-preview-container > svg"
-        );
-        if (!sketch) {
-          throw new Error("sketch not found");
+
+        originalSvg.remove();
+        const sketch = tempContainer.querySelector("svg");
+
+        if (sketch) {
+          // 把原始文字补回去
+          savedTexts.forEach((text) => sketch.appendChild(text));
+
+          const height = sketch.getAttribute("height");
+          const width = sketch.getAttribute("width");
+          sketch.setAttribute("viewBox", `0 0 ${width} ${height}`);
+          sketch.style.maxWidth = "100%";
+          setSvgContent(sketch.outerHTML);
         }
-        const height = sketch.getAttribute("height");
-        const width = sketch.getAttribute("width");
-        // sketch.setAttribute("height", "100%");
-        sketch.setAttribute("max-width", "100%");
-        sketch.setAttribute("id", "mermaid-preview");
-        sketch.setAttribute("viewBox", `0 0 ${width} ${height}`);
-        sketch.style.maxWidth = "100%";
+
+        document.body.removeChild(tempContainer);
       } else {
-        // graphDiv.setAttribute("height", "100%");
         graphDiv.style.maxWidth = "100%";
-        // if (bindFunctions) {
-        //   bindFunctions(graphDiv);
-        // }
       }
       setIsError(false);
     } catch (error) {
       console.log("Mermaid 渲染错误:", error);
-      setIsError(true);
+      // setIsError(true);
       // 发生错误时不更新 mermaidContent，保留上次的正确结果
     }
   };
@@ -606,14 +603,14 @@ const LiveEditor = () => {
                 <Button
                   className="action-btn w-full"
                   variant="outline"
-                  onClick={() => onDownloadPNG()}
+                  onClick={onDownloadPNG}
                 >
                   <Download /> Png
                 </Button>
                 <Button
                   variant="outline"
                   className="action-btn w-full"
-                  onClick={() => onDownloadSVG()}
+                  onClick={onDownloadSVG}
                 >
                   <Download /> Svg
                 </Button>
@@ -672,13 +669,7 @@ const LiveEditor = () => {
       >
         <div className="flex flex-col h-full">
           <PreviewToolbar />
-          <div
-            id="mermaid-preview-container"
-            className={`mermaid-preview-container w-full h-full p-4 flex justify-center ${
-              isError ? "opacity-50" : ""
-            }`}
-            // dangerouslySetInnerHTML={{ __html: mermaidContent }}
-          ></div>
+          <DiagramCanvas svgContent={svgContent} />
           {isError && (
             <div className="text-red-500 text-sm p-2">
               {t("diagram.syntaxError")}
