@@ -71,6 +71,11 @@ export function LoginForm({
             onChange={(e) =>
               setCredentials({ ...credentials, password: e.target.value })
             }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit(e);
+              }
+            }}
           />
         </div>
         <Button type="submit" className="w-full">

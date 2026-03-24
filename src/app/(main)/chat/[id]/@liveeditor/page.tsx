@@ -53,7 +53,7 @@ import { CodeEditorToolbar } from "./components/code-editor-toolbar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import DiagramCanvas from "./components/diagram-canvas";
+import DiagramCanvas from "./components/diagram-board";
 
 const LiveEditor = () => {
   const t = useI18n();

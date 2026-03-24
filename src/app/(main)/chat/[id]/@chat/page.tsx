@@ -109,7 +109,7 @@ const Independent: React.FC = () => {
     agent,
   });
 
-  const { showRightPanel, setShowRightPanel } = useChatContext();
+  const { showRightPanel, setShowRightPanel, selected } = useChatContext();
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
@@ -525,10 +525,6 @@ const Independent: React.FC = () => {
         </Breadcrumb>
       </header>
       <div className={styles.chat}>
-        {/* <div
-          className="flex-1 contain-strict overflow-auto"
-          style={{ minHeight: 0 }}
-        > */}
         {/* 🌟 消息列表 */}
         <Bubble.List
           autoScroll
@@ -544,6 +540,7 @@ const Independent: React.FC = () => {
         {/* 🌟 输入框 */}
         <div className={styles.sender}>
           <CustomSender
+            selected={selected}
             content={content}
             onEnhance={() => enhanceDescription(content)}
             onSubmit={() => onSubmit(content)}

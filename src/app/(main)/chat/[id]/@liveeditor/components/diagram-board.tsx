@@ -2,11 +2,16 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { SvgContainer } from "./svg-container";
 import { useChatContext } from "../../layout";
 
-function DiagramCanvas({ svgContent }: { svgContent: string }) {
+function DiagramBoard({ svgContent }: { svgContent: string }) {
   const { selected, setSelected } = useChatContext();
-  const containerRef = useRef(null);
-  const [selBox, setSelBox] = useState(null);
-  const startPos = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selBox, setSelBox] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
+  const startPos = useRef<{ x: number; y: number } | null>(null);
 
   // 缩放和平移状态
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
@@ -15,25 +20,35 @@ function DiagramCanvas({ svgContent }: { svgContent: string }) {
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 5;
 
-  // 滚轮缩放
-  const handleWheel = useCallback((e) => {
+  // 滚轮缩放 + 触控板双指平移/捏合
+  const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.95 : 1.05;
-    setTransform((prev) => {
-      const newScale = Math.min(
-        MAX_SCALE,
-        Math.max(MIN_SCALE, prev.scale * delta)
-      );
-      // 以鼠标位置为中心缩放
-      const rect = containerRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      return {
-        scale: newScale,
-        x: mouseX - (mouseX - prev.x) * (newScale / prev.scale),
-        y: mouseY - (mouseY - prev.y) * (newScale / prev.scale),
-      };
-    });
+    // ctrlKey=true 表示 pinch 手势或 Ctrl+滚轮 → 缩放
+    if (e.ctrlKey) {
+      const delta = e.deltaY > 0 ? 0.98 : 1.02;
+      setTransform((prev) => {
+        if (!containerRef.current) return prev;
+        const newScale = Math.min(
+          MAX_SCALE,
+          Math.max(MIN_SCALE, prev.scale * delta)
+        );
+        const rect = containerRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        return {
+          scale: newScale,
+          x: mouseX - (mouseX - prev.x) * (newScale / prev.scale),
+          y: mouseY - (mouseY - prev.y) * (newScale / prev.scale),
+        };
+      });
+    } else {
+      // 双指滑动 → 平移（deltaX/deltaY 单位已是像素）
+      setTransform((prev) => ({
+        ...prev,
+        x: prev.x - e.deltaX,
+        y: prev.y - e.deltaY,
+      }));
+    }
   }, []);
 
   // 绑定 wheel 事件（需要 passive: false）
@@ -46,6 +61,7 @@ function DiagramCanvas({ svgContent }: { svgContent: string }) {
 
   // 中键拖拽平移
   const handleMouseDown = (e) => {
+    console.log("handleMouseDown", e);
     // 中键或空格+左键 → 平移
     if (e.button === 1) {
       e.preventDefault();
@@ -151,17 +167,25 @@ function DiagramCanvas({ svgContent }: { svgContent: string }) {
     });
   };
 
+  // 以容器中心为基准缩放
+  const zoomAtCenter = (factor: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    setTransform((prev) => {
+      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * factor));
+      return {
+        scale: newScale,
+        x: cx - (cx - prev.x) * (newScale / prev.scale),
+        y: cy - (cy - prev.y) * (newScale / prev.scale),
+      };
+    });
+  };
+
   // 缩放控制按钮
-  const zoomIn = () =>
-    setTransform((prev) => ({
-      ...prev,
-      scale: Math.min(MAX_SCALE, prev.scale * 1.1),
-    }));
-  const zoomOut = () =>
-    setTransform((prev) => ({
-      ...prev,
-      scale: Math.max(MIN_SCALE, prev.scale / 1.1),
-    }));
+  const zoomIn = () => zoomAtCenter(1.1);
+  const zoomOut = () => zoomAtCenter(1 / 1.1);
   const resetView = () => setTransform({ x: 0, y: 0, scale: 1 });
 
   // 高亮选中节点
@@ -286,4 +310,4 @@ const btnStyle = {
   justifyContent: "center",
 };
 
-export default DiagramCanvas;
+export default DiagramBoard;

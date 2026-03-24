@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
-    "@ant-design/x": "^1.0.4",
+    "@ant-design/x": "^1.6.1",
     "@hookform/resolvers": "^3.10.0",
     "@monaco-editor/react": "^4.6.0",
     "@next/bundle-analyzer": "^16.2.0",
