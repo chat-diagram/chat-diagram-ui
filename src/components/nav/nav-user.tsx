@@ -25,19 +25,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { User } from "@/types/auth";
-import { Avatar } from "./avatar";
+import { Avatar } from "../avatar";
 import { useDeleteUser, useLogout } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
 import { useAppStore } from "@/store/app";
 import Link from "next/link";
-import { ModeToggle } from "./toggle-mode";
-import { LanguageSwitcher } from "./language-switcher";
+import { ModeToggle } from "../toggle-mode";
+import { LanguageSwitcher } from "../language-switcher";
 import { useI18n } from "@/i18n";
 
 const SettingDialog = ({

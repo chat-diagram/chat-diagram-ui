@@ -7,15 +7,7 @@ import dayjs from "@/lib/utils/dayjs";
 import { toBase64 } from "js-base64";
 import { useEffect, useState } from "react";
 import { useChatContext } from "../layout";
-import {
-  Check,
-  ChevronsRight,
-  Copy,
-  Download,
-  Redo2,
-  Share,
-  Undo2,
-} from "lucide-react";
+import { Check, Copy, Download, Redo2, Share, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { queryClient } from "@/lib/request";
 import { useParams } from "next/navigation";
@@ -55,7 +47,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import DiagramCanvas from "./components/diagram-board";
 
-const LiveEditor = () => {
+const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   const t = useI18n();
   const {
     mermaidCode,
@@ -81,6 +73,7 @@ const LiveEditor = () => {
 
     try {
       // 先验证语法
+
       await mermaid.parse(code);
       // // 语法正确才进行渲染
       const result = await mermaid.render(`mermaid-${Date.now()}`, code);
@@ -421,25 +414,22 @@ const LiveEditor = () => {
   >("autosize");
   const [userimagesize, setUserimagesize] = useState(1080);
   return (
-    <div className="flex flex-col h-screen" style={{ minWidth: "400px" }}>
-      <div className="w-full p-1 border-b  flex items-center gap-2">
-        {!isSharePage && (
-          <Button
-            size="mini"
-            variant="ghost"
-            onClick={() => setShowRightPanel(false)}
-          >
-            <ChevronsRight className="w-4 h-4" />
-          </Button>
-        )}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+    <div
+      className="flex flex-col h-screen relative"
+      style={{ minWidth: "400px" }}
+    >
+      <div className="w-full p-1 border-b  flex items-center justify-end gap-2">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="ml-auto"
+        >
           <TabsList>
             <TabsTrigger value="preview">{t("diagram.previewBtn")}</TabsTrigger>
             <TabsTrigger value="code">{t("diagram.codeBtn")}</TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="ml-auto flex items-center gap-2">
-          {/* 版本控制 */}
+        <div className=" flex items-center gap-2">
           {!isSharePage && (
             <>
               {diagram?.currentVersion ===
@@ -483,7 +473,6 @@ const LiveEditor = () => {
               <Separator orientation="vertical" className="h-4" />
             </>
           )}
-          {/* 分享 */}
           {!isSharePage && (
             <Popover open={showShare} onOpenChange={setShowShare}>
               <Tooltip>
@@ -677,6 +666,7 @@ const LiveEditor = () => {
           )}
         </div>
       </div>
+      {children}
     </div>
   );
 };

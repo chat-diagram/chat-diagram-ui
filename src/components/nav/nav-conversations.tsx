@@ -2,7 +2,7 @@ import React from "react";
 import { createStyles } from "antd-style";
 import { Conversations } from "@ant-design/x";
 import { GetProp } from "antd";
-import { SidebarGroup, SidebarGroupLabel } from "./ui/sidebar";
+import { SidebarGroup, SidebarGroupLabel } from "../ui/sidebar";
 import { useRouter } from "next/navigation";
 
 export function NavConversations({

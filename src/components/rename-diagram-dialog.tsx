@@ -20,7 +20,6 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useDiagramsStore } from "@/store/diagrams";
-import { useEffect } from "react";
 import { useRenameDiagram } from "@/hooks/use-diagrams";
 import { useI18n } from "@/i18n";
 
@@ -41,13 +40,12 @@ export const RenameDiagramDialog = () => {
       name: renameDiagramInfo?.title || "",
     },
   });
-  useEffect(() => {
-    if (renameDiagramInfo) {
-      renameDiagramForm.setValue("name", renameDiagramInfo.title);
-    }
-  }, [renameDiagramInfo, renameDiagramForm]);
   const onRenameDiagramDialogOpenChange = (open: boolean) => {
-    if (!open) {
+    if (open) {
+      if (renameDiagramInfo) {
+        renameDiagramForm.setValue("name", renameDiagramInfo.title);
+      }
+    } else {
       renameDiagramForm.reset();
     }
     setRenameDiagramDialogOpen(open, renameDiagramInfo);
@@ -100,23 +98,6 @@ export const RenameDiagramDialog = () => {
                 </FormItem>
               )}
             ></FormField>
-            {/* <FormField
-              control={renameDiagramForm.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="This is a description"
-                      {...field}
-                    ></Input>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            ></FormField> */}
-
             <DialogFooter>
               <Button
                 variant="outline"

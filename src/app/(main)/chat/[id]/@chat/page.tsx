@@ -8,27 +8,12 @@ import { CustomSender } from "@/components/sender";
 import { useSender } from "@/hooks/use-sender";
 import { useGetDiagram } from "@/hooks/use-diagrams";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import Link from "next/link";
 import { diagramsApi, DiagramVersion } from "@/lib/api/diagrams";
 import { MessageInfo, MessageStatus } from "@ant-design/x/es/useXChat";
 import { Avatar as AvatarUser } from "@/components/avatar";
 import { LocalIcons } from "@/components/local-icons";
 import { useAppStore } from "@/store/app";
 import { User } from "@/types/auth";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useDiagramsStore } from "@/store/diagrams";
 import { queryClient } from "@/lib/request";
 import { useStyle } from "./styles";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +58,7 @@ const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
 const Independent: React.FC = () => {
   const t = useI18n();
 
-  const [title, setTitle] = useState("");
+  const { title, setTitle } = useChatContext();
   const { user } = useAppStore();
 
   const router = useRouter();
@@ -109,11 +94,10 @@ const Independent: React.FC = () => {
     agent,
   });
 
-  const { showRightPanel, setShowRightPanel, selected } = useChatContext();
+  const { selected } = useChatContext();
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
-    setShowRightPanel(true);
     onRequest(nextContent);
     setContent("");
   };
@@ -300,15 +284,13 @@ const Independent: React.FC = () => {
                     diagramId: id as string,
                   }
                 );
-                // setMermaidCode(mermaidCode);
-                setShowRightPanel(true);
               }}
               // hoverable
               // className="hover:shadow-md hover:border-blue-400"
               style={{
                 cursor: "pointer",
                 outline:
-                  activeDiagramVersion?.id === versionId && showRightPanel
+                  activeDiagramVersion?.id === versionId
                     ? "1px solid #AAA"
                     : "",
               }}
@@ -472,58 +454,9 @@ const Independent: React.FC = () => {
   const { content, setContent, loading, setLoading, enhanceDescription } =
     useSender();
 
-  const { setRenameDiagramDialogOpen } = useDiagramsStore();
-  const handleRenameDiagram = () => {
-    setRenameDiagramDialogOpen(true, diagrams);
-  };
-
   // ==================== Render =================
   return (
     <>
-      <header className="px-4 flex justify-between items-center h-12">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/chat/projects`}>{t("project.title")}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                {queryProjectTitle ? (
-                  <span>{queryProjectTitle}</span>
-                ) : (
-                  <Link href={`/chat/projects/${diagrams?.projectId}`}>
-                    {diagrams?.project?.name}
-                  </Link>
-                )}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              {queryProjectTitle ? (
-                <span>{title}</span>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <BreadcrumbPage
-                      onClick={handleRenameDiagram}
-                      className="hover:underline"
-                      style={{ cursor: "pointer" }}
-                    >
-                      {diagrams?.title}
-                    </BreadcrumbPage>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t("diagram.renameBtnTooltip")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
       <div className={styles.chat}>
         {/* 🌟 消息列表 */}
         <Bubble.List

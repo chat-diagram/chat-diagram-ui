@@ -1,11 +1,11 @@
 "use client";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { createStyles } from "antd-style";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { Diagram, diagramsApi, DiagramVersion } from "@/lib/api/diagrams";
 import { EditorState } from "@/types/editor";
+import FloatingInspectPanel from "@/components/floating-panel";
 
 const useStyle = createStyles(({ token, css }) => {
   return {
@@ -98,8 +98,6 @@ interface ChatContextType {
   setMermaidCode: (code: string) => void;
   enhancedDescription: string;
   setEnhancedDescription: (desc: string) => void;
-  showRightPanel: boolean;
-  setShowRightPanel: (show: boolean) => void;
   editorMounted: boolean;
   setEditorMounted: (mounted: boolean) => void;
   activeDiagramVersion: DiagramVersion | null;
@@ -112,6 +110,8 @@ interface ChatContextType {
   setEditorState: (state: EditorState) => void;
   selected: Set<string>;
   setSelected: (selected: Set<string> | (() => Set<string>)) => void;
+  title: string;
+  setTitle: (title: string) => void;
 }
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -119,7 +119,6 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 function ChatProvider({ children }: { children: React.ReactNode }) {
   const [mermaidCode, setMermaidCodeOrigin] = useState("");
   const [enhancedDescription, setEnhancedDescription] = useState("");
-  const [showRightPanel, setShowRightPanel] = useState(true);
   const [editorMounted, setEditorMounted] = useState(false);
   const [activeDiagramVersion, setActiveDiagramVersion] = useState(null);
   const [diagram, setDiagram] = useState<Diagram | null>(null);
@@ -165,8 +164,6 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setMermaidCode,
         enhancedDescription,
         setEnhancedDescription,
-        showRightPanel,
-        setShowRightPanel,
         editorMounted,
         setEditorMounted,
         activeDiagramVersion,
@@ -197,9 +194,11 @@ export function useChatContext() {
 const Layout = ({
   chat,
   liveEditor,
+  header,
 }: {
   chat: React.ReactNode;
   liveEditor: React.ReactNode;
+  header: React.ReactNode;
 }) => {
   const pathname = usePathname();
   // 如果是 projects 路径，触发 404 处理，让 Next.js 继续匹配其他路由
@@ -209,8 +208,6 @@ const Layout = ({
   const params = useParams();
   const { id } = params;
   const {
-    showRightPanel,
-    setShowRightPanel,
     setIsSharePage,
     isSharePage,
     setActiveDiagramVersion,
@@ -236,26 +233,6 @@ const Layout = ({
 
   // ==================== Runtime ====================
 
-  const PanelResizeHandleWithStyle = ({
-    vertical,
-    onClick,
-  }: {
-    vertical?: boolean;
-    onClick?: () => void;
-  }) => {
-    return (
-      <PanelResizeHandle
-        className={[
-          styles.ResizeHandleOuter,
-          ` transition-colors duration-200 ${vertical ? "h-[1px]" : "w-[1px]"}`,
-        ].join(" ")}
-        onClick={onClick}
-      >
-        {/* <div className={styles.ResizeHandleInner}></div> */}
-      </PanelResizeHandle>
-    );
-  };
-
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -269,46 +246,17 @@ const Layout = ({
 
   // ==================== Render =================
   return (
-    <div className={styles.layout}>
-      <PanelGroup direction="horizontal" className="w-full h-full">
+    <div className={styles.layout + " relative"}>
+      <div className="w-full h-full">{liveEditor}</div>
+      <div className="absolute top-0 left-0">{header}</div>
+
+      <FloatingInspectPanel>
         {Boolean(!isSharePage) && (
           <>
-            <Panel
-              minSize={30}
-              className="flex flex-col "
-              style={{ maxHeight: "100vh" }}
-            >
-              {chat}
-            </Panel>
-            <PanelResizeHandleWithStyle
-              onClick={() => {
-                setShowRightPanel(!showRightPanel);
-              }}
-            />
+            <div className="">{chat}</div>
           </>
         )}
-        {/* <Panel>
-          <PanelGroup direction="vertical">
-            <Panel>top</Panel>
-            <PanelResizeHandleWithStyle vertical={true} />
-
-            <Panel>
-              <PanelGroup direction="horizontal">
-                <Panel>left</Panel>
-                <PanelResizeHandleWithStyle />
-
-                <Panel>right</Panel>
-              </PanelGroup>
-            </Panel>
-          </PanelGroup>
-        </Panel>
-        <PanelResizeHandleWithStyle /> */}
-        {showRightPanel && (
-          <Panel minSize={30} style={{ minWidth: "400px" }}>
-            {liveEditor}
-          </Panel>
-        )}
-      </PanelGroup>
+      </FloatingInspectPanel>
     </div>
   );
 };
@@ -316,13 +264,15 @@ const Layout = ({
 const LayoutWithProvider = ({
   chat,
   liveeditor: liveEditor,
+  header,
 }: {
   chat: React.ReactNode;
   liveeditor: React.ReactNode;
+  header: React.ReactNode;
 }) => {
   return (
     <ChatProvider>
-      <Layout chat={chat} liveEditor={liveEditor} />
+      <Layout chat={chat} liveEditor={liveEditor} header={header} />
     </ChatProvider>
   );
 };
