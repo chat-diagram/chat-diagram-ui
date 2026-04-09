@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Editor, { Monaco, OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
+
 import { initEditor } from "@/lib/monacoExtra";
 import { useTheme } from "next-themes";
 
@@ -15,7 +16,7 @@ interface MonacoEditorProps {
   onMount: (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 }
 
-const MonacoEditor = ({
+const CodeEditor = ({
   value = "",
   onChange,
   language = "mermaid",
@@ -104,4 +105,4 @@ const MonacoEditor = ({
   );
 };
 
-export default MonacoEditor;
+export default CodeEditor;

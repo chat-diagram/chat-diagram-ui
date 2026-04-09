@@ -1,7 +1,7 @@
 "use client";
-import MonacoEditor from "@/components/monaco-editor";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mermaid from "mermaid";
+import { renderMermaidSVG } from "beautiful-mermaid";
 import { waitForRender } from "@/lib/utils/autoSync";
 import dayjs from "@/lib/utils/dayjs";
 import { toBase64 } from "js-base64";
@@ -34,25 +34,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { downloadSvgAsPng, simulateDownload } from "@/lib/utils";
-import {
-  DownloadButton,
-  LatestVersionBadge,
-  RollbackVersionBadge,
-} from "./components";
+import RollbackVersionBadge from "./components/rollback-version-badge";
+import LatestVersionBadge from "./components/latest-version-badge";
 import { Svg2Roughjs } from "svg2roughjs";
-import { PreviewToolbar } from "./components/preview-toobar";
-import { CodeEditorToolbar } from "./components/code-editor-toolbar";
+import { DiagramToolbar } from "../../../../../components/diagram/diagram-toobar";
+import { CodeEditorToolbar } from "../../../../../components/code/code-editor-toolbar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import DiagramCanvas from "./components/diagram-board";
+import CodeEditor from "@/components/code/code-editor";
+import DiagramBoard from "./components/diagram-board";
 
 const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   const t = useI18n();
   const {
     mermaidCode,
     setMermaidCode,
-    setShowRightPanel,
     setActiveDiagramVersion,
     activeDiagramVersion,
     isSharePage,
@@ -60,25 +57,26 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
     setEditorState,
   } = useChatContext();
 
-  const [activeTab, setActiveTab] = useState("preview");
+  const [activeTab, setActiveTab] = useState("diagram");
   // 存储mermaid的svg内容
   const [svgContent, setSvgContent] = useState("");
-
-  //   const [lastSuccessfulContent, setLastSuccessfulContent] = useState(""); // 最后一次成功的内容
 
   const [isError, setIsError] = useState(false);
 
   const renderMermaid = async (code: string) => {
-    // if (!code.trim()) return;
-
     try {
       // 先验证语法
 
       await mermaid.parse(code);
+      // const svg = await renderMermaidSVG(code);
       // // 语法正确才进行渲染
-      const result = await mermaid.render(`mermaid-${Date.now()}`, code);
+      // const result = await mermaid.render(`mermaid-${Date.now()}`, code);
+      const result = renderMermaidSVG(code, {
+        bg: "transparent",
+      });
       console.log("result", document.getElementById("mermaid-preview"));
-      setSvgContent(result.svg);
+      // setSvgContent(result.svg);
+      setSvgContent(result);
       const graphDiv =
         document.querySelector<SVGSVGElement>("#mermaid-preview")!;
       if (editorState.rough) {
@@ -132,7 +130,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
 
   const diagram = queryClient.getQueryData<Diagram>(["diagram", id]);
   const versionLength = diagram?.versions.length;
-  console.log("diagram", diagram);
 
   const handlePreviousVersion = () => {
     // if (activeDiagramVersion?.versionNumber) {
@@ -153,7 +150,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   );
 
   const handleRollbackDiagramVersion = () => {
-    console.log("handleRollbackDiagramVersion");
     if (activeDiagramVersion) {
       rollbackDiagramVersion(activeDiagramVersion?.versionNumber || 0);
     }
@@ -185,8 +181,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
     const init = () => {
       updateTheme();
       initializeMermaid();
-
-      console.log("mermaid初始化完成");
 
       if (mermaidCode) {
         renderMermaid(mermaidCode);
@@ -248,7 +242,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
         expiration: shareTime,
       }
     );
-    console.log("res", res);
     const url = currentUrl.split("/").slice(0, -1).join("/");
     const shareUrl = `${url}/${res.uuid}?share=true`;
 
@@ -330,7 +323,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
     };
   };
   const onDownloadPNG = async (event: Event) => {
-    // handleDownloadPNG();
     await exportImage(event, downloadImage);
   };
   type Exporter = (
@@ -425,7 +417,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
           className="ml-auto"
         >
           <TabsList>
-            <TabsTrigger value="preview">{t("diagram.previewBtn")}</TabsTrigger>
+            <TabsTrigger value="diagram">{t("diagram.previewBtn")}</TabsTrigger>
             <TabsTrigger value="code">{t("diagram.codeBtn")}</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -539,18 +531,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
               </PopoverContent>
             </Popover>
           )}
-          {/* 下载 */}
-          {/* <DownloadButton handleDownloadPNG={handleDownloadPNG} /> */}
-          {/* <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="h5" variant="ghost" onClick={handleDownloadPNG}>
-                <Download className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t("diagram.downloadPNG")}</p>
-            </TooltipContent>
-          </Tooltip> */}
           <Popover open={showDownLoad} onOpenChange={setShowDownLoad}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -641,7 +621,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
         className={`w-full h-full ${activeTab === "code" ? "block" : "hidden"}`}
       >
         <CodeEditorToolbar />
-        <MonacoEditor
+        <CodeEditor
           value={mermaidCode}
           onChange={handleCodeChange}
           language="mermaid"
@@ -650,15 +630,15 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
           onMount={handleEditorDidMount}
         />
       </div>
-      {/* tab-preview */}
+      {/* tab-diagram */}
       <div
         className={`${
-          activeTab === "preview" ? "block" : "invisible"
+          activeTab === "diagram" ? "block" : "invisible"
         } flex-1 overflow-auto`}
       >
         <div className="flex flex-col h-full">
-          <PreviewToolbar />
-          <DiagramCanvas svgContent={svgContent} />
+          {/* <DiagramToolbar /> */}
+          <DiagramBoard svgContent={svgContent} />
           {isError && (
             <div className="text-red-500 text-sm p-2">
               {t("diagram.syntaxError")}

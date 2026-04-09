@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useChatContext } from "../../layout";
+import { useChatContext } from "../../app/(main)/chat/[id]/layout";
 import { Copy } from "lucide-react";
 import { message } from "antd";
 import { useI18n } from "@/i18n";

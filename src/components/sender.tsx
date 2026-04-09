@@ -22,7 +22,7 @@ export const CustomSender = ({
   loading: boolean;
   setLoading: (loading: boolean) => void;
   onEnhance: () => void;
-  selected: Set<string> | null;
+  selected?: Set<string> | null;
 }) => {
   // const { selected } = useChatContext();
   const [showUpgrade, setShowUpgrade] = React.useState(true);

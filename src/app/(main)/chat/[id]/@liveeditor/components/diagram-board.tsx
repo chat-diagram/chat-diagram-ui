@@ -174,7 +174,10 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
     const cx = rect.width / 2;
     const cy = rect.height / 2;
     setTransform((prev) => {
-      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * factor));
+      const newScale = Math.min(
+        MAX_SCALE,
+        Math.max(MIN_SCALE, prev.scale * factor)
+      );
       return {
         scale: newScale,
         x: cx - (cx - prev.x) * (newScale / prev.scale),

@@ -1,8 +1,8 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useChatContext } from "../../layout";
+import { useChatContext } from "../../app/(main)/chat/[id]/layout";
 
-export const PreviewToolbar = () => {
+export const DiagramToolbar = () => {
   const { editorState, setEditorState } = useChatContext();
   return (
     <>

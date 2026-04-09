@@ -12,7 +12,6 @@ export default function Page({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       {!share && <AppSidebar />}
-
       <SidebarInset>{children}</SidebarInset>
       <AddProjectDialog />
       <RenameDiagramDialog />

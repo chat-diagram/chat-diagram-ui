@@ -19,8 +19,8 @@ export const projectsApi = {
    * get all projects of user
    */
   getProjectsList: () => request.get<GetProjectListResponse>("/projects"),
-  getProject: (projectId: string) =>
-    request.get<Project>(`/projects/${projectId}`),
+  getProject: (projectId: string, signal?: AbortSignal) =>
+    request.get<Project>(`/projects/${projectId}`, { signal }),
   createProject: (data: { name: string; description: string }) =>
     request.post<CreateProjectResponse>("/projects", data),
   deleteProject: (projectId: string) =>
