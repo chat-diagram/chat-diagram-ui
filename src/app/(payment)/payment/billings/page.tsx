@@ -23,7 +23,7 @@ import { ChevronDown, Receipt } from "lucide-react";
 import { useAppStore } from "@/store/app";
 import Link from "next/link";
 import { usePaymentsHistory } from "@/hooks/use-payments";
-import { paymentApi } from "@/lib/api/payment";
+import { Payment, paymentApi } from "@/lib/api/payment";
 import { useI18n } from "@/i18n";
 
 interface Order {
@@ -94,16 +94,16 @@ function EmptyState() {
 
 export default function BillingHistory() {
   const t = useI18n();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Payment | null>(null);
   const isPro = useAppStore((state) => state.user?.subscription?.isPro);
   if (!isPro) {
     orders.length = 0;
   }
-  const { data: paymentHistory = [], isLoading, error } = usePaymentsHistory();
+  const { data: paymentHistory = [] } = usePaymentsHistory();
 
   // const selectedOrderId = useState;
   // const { data: paymentDetail } = usePaymentDetail(selectedOrder?.id);
-  const handleGetOrderDetail = async (order: Order) => {
+  const handleGetOrderDetail = async (order: { id: string }) => {
     const detail = await paymentApi.getPaymentDetail(order.id);
     setSelectedOrder(detail);
   };
@@ -188,7 +188,7 @@ export default function BillingHistory() {
                                 {t("payment.billings.tradePaidAt")}
                               </span>
                               <span>
-                                {formatDateTime(selectedOrder?.paidAt)}
+                                {selectedOrder?.paidAt ? formatDateTime(selectedOrder.paidAt) : ""}
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -196,7 +196,7 @@ export default function BillingHistory() {
                                 {t("payment.billings.tradeAmount")}
                               </span>
                               <span>
-                                ¥ {(selectedOrder?.amount / 100).toFixed(2)}
+                                ¥ {((selectedOrder?.amount ?? 0) / 100).toFixed(2)}
                               </span>
                             </div>
                             <div className="flex justify-between">

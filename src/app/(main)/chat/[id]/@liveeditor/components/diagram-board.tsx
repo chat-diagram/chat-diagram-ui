@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { SvgContainer } from "./svg-container";
 import { useChatContext } from "../../layout";
 
@@ -60,7 +60,7 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
   }, [handleWheel]);
 
   // 中键拖拽平移
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     console.log("handleMouseDown", e);
     // 中键或空格+左键 → 平移
     if (e.button === 1) {
@@ -73,8 +73,9 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
       return;
     }
     // 左键点在节点上 → 不框选
-    if (e.target.closest(".node")) return;
+    if ((e.target as Element).closest(".node")) return;
     // 左键框选
+    if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     startPos.current = {
       x: e.clientX - rect.left,
@@ -83,7 +84,7 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
     setSelBox({ x: startPos.current.x, y: startPos.current.y, w: 0, h: 0 });
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     // 平移
     if (isPanning.current) {
       setTransform((prev) => ({
@@ -94,7 +95,7 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
       return;
     }
     // 框选
-    if (!startPos.current) return;
+    if (!startPos.current || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const curX = e.clientX - rect.left;
     const curY = e.clientY - rect.top;
@@ -116,11 +117,12 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
       setSelBox(null);
       return;
     }
-    const nodes = containerRef.current.querySelectorAll(".node");
-    const hits = new Set();
+    const container = containerRef.current;
+    const nodes = container.querySelectorAll(".node");
+    const hits = new Set<string>();
     nodes.forEach((node) => {
       const r = node.getBoundingClientRect();
-      const cr = containerRef.current.getBoundingClientRect();
+      const cr = container.getBoundingClientRect();
       const nodeRect = {
         x: r.left - cr.left,
         y: r.top - cr.top,
@@ -141,8 +143,8 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
     setSelBox(null);
   };
 
-  const handleClick = (e) => {
-    const node = e.target.closest(".node");
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const node = (e.target as Element).closest(".node");
     if (!node) {
       setSelected(new Set());
       return;
@@ -151,19 +153,11 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
     setSelected((prev) => {
       const next = new Set(prev);
       if (e.shiftKey) {
-        next.has(id) ? next.delete(id) : next.add(id);
+        if (next.has(id)) { next.delete(id); } else { next.add(id); }
       } else {
         return new Set([id]);
       }
       return next;
-    });
-  };
-
-  const getSelectedContent = () => {
-    if (!containerRef.current) return [];
-    return [...selected].map((id) => {
-      const node = containerRef.current.querySelector(`#${id}`);
-      return { id, text: node?.textContent?.trim() || "" };
     });
   };
 

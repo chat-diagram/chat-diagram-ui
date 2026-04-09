@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import MonacoEditor from "@/components/monaco-editor";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mermaid from "mermaid";
@@ -33,9 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { downloadSvgAsPng, simulateDownload } from "@/lib/utils";
+import { simulateDownload } from "@/lib/utils";
 import {
-  DownloadButton,
   LatestVersionBadge,
   RollbackVersionBadge,
 } from "./components";
@@ -52,12 +52,10 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   const {
     mermaidCode,
     setMermaidCode,
-    setShowRightPanel,
     setActiveDiagramVersion,
     activeDiagramVersion,
     isSharePage,
     editorState,
-    setEditorState,
   } = useChatContext();
 
   const [activeTab, setActiveTab] = useState("preview");
@@ -77,7 +75,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
       await mermaid.parse(code);
       // // 语法正确才进行渲染
       const result = await mermaid.render(`mermaid-${Date.now()}`, code);
-      console.log("result", document.getElementById("mermaid-preview"));
       setSvgContent(result.svg);
       const graphDiv =
         document.querySelector<SVGSVGElement>("#mermaid-preview")!;
@@ -90,6 +87,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
 
         tempContainer.innerHTML = result.svg;
         const originalSvg = tempContainer.querySelector("svg");
+        if (!originalSvg) { document.body.removeChild(tempContainer); return; }
 
         // 保存原始文字节点
         const textNodes = originalSvg.querySelectorAll("text");
@@ -118,8 +116,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
         graphDiv.style.maxWidth = "100%";
       }
       setIsError(false);
-    } catch (error) {
-      console.log("Mermaid 渲染错误:", error);
+    } catch {
       // setIsError(true);
       // 发生错误时不更新 mermaidContent，保留上次的正确结果
     }
@@ -132,19 +129,18 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
 
   const diagram = queryClient.getQueryData<Diagram>(["diagram", id]);
   const versionLength = diagram?.versions.length;
-  console.log("diagram", diagram);
 
   const handlePreviousVersion = () => {
     // if (activeDiagramVersion?.versionNumber) {
     setActiveDiagramVersion(
-      diagram?.versions[activeDiagramVersion?.versionNumber - 2]
+      diagram?.versions[(activeDiagramVersion?.versionNumber ?? 0) - 2] ?? null
     );
     // }
   };
   const handleNextVersion = () => {
     // if (activeDiagramVersion?.versionNumber) {
     setActiveDiagramVersion(
-      diagram?.versions[activeDiagramVersion?.versionNumber]
+      diagram?.versions[activeDiagramVersion?.versionNumber ?? 0] ?? null
     );
     // }
   };
@@ -153,7 +149,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   );
 
   const handleRollbackDiagramVersion = () => {
-    console.log("handleRollbackDiagramVersion");
     if (activeDiagramVersion) {
       rollbackDiagramVersion(activeDiagramVersion?.versionNumber || 0);
     }
@@ -162,7 +157,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   const { theme: nextTheme } = useTheme();
 
   useEffect(() => {
-    let finalTheme = nextTheme;
+    let finalTheme: "default" | "dark" | "base" | "forest" | "neutral" | "null" | undefined = nextTheme === "dark" ? "dark" : "default";
     const updateTheme = () => {
       if (nextTheme === "system") {
         if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -185,8 +180,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
     const init = () => {
       updateTheme();
       initializeMermaid();
-
-      console.log("mermaid初始化完成");
 
       if (mermaidCode) {
         renderMermaid(mermaidCode);
@@ -248,7 +241,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
         expiration: shareTime,
       }
     );
-    console.log("res", res);
     const url = currentUrl.split("/").slice(0, -1).join("/");
     const shareUrl = `${url}/${res.uuid}?share=true`;
 
@@ -262,14 +254,6 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
   };
   const getFileName = (extension: string) =>
     `chat-diagram-${dayjs().format("YYYY-MM-DD-HHmmss")}.${extension}`;
-  const handleDownloadPNG = () => {
-    const svgElement = document.getElementById("mermaid-preview");
-    if (!svgElement) {
-      // message.error(t("diagram.downloadError"));
-      return;
-    }
-    downloadSvgAsPng(svgElement, "mermaid-diagram.png");
-  };
   const getSvgElement = () => {
     const svgElement = document
       .querySelector("#mermaid-preview-container svg")
@@ -297,15 +281,15 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
     svg?.insertBefore(style, svg.firstChild);
 
     // 确保正确的viewBox
-    height && svg?.setAttribute("height", `${height}px`);
-    width && svg?.setAttribute("width", `${width}px`); // Workaround https://stackoverflow.com/questions/28690643/firefox-error-rendering-an-svg-image-to-html5-canvas-with-drawimage
+    if (height) { svg?.setAttribute("height", `${height}px`); }
+    if (width) { svg?.setAttribute("width", `${width}px`); } // Workaround https://stackoverflow.com/questions/28690643/firefox-error-rendering-an-svg-image-to-html5-canvas-with-drawimage
     svg?.setAttribute("preserveAspectRatio", "xMidYMid meet");
     if (!svg) {
       svg = getSvgElement();
     }
     const svgString = svg.outerHTML
       .replaceAll("<br>", "<br/>")
-      .replaceAll(/<img([^>]*)>/g, (m, g: string) => `<img ${g} />`);
+      .replaceAll(/<img([^>]*)>/g, (_m, g: string) => `<img ${g} />`);
 
     //     return toBase64(`<?xml version="1.0" encoding="UTF-8"?>
     // <?xml-stylesheet href="${FONT_AWESOME_URL}" type="text/css"?>
@@ -329,7 +313,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
       );
     };
   };
-  const onDownloadPNG = async (event: Event) => {
+  const onDownloadPNG = async (event: React.MouseEvent<HTMLButtonElement>) => {
     // handleDownloadPNG();
     await exportImage(event, downloadImage);
   };
@@ -352,13 +336,13 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
               [blob.type]: blob,
             }),
           ]);
-        } catch (error) {
-          console.error(error);
+        } catch {
+          // clipboard write failed
         }
       });
     };
   };
-  const exportImage = async (event: Event, exporter: Exporter) => {
+  const exportImage = async (event: React.MouseEvent<HTMLButtonElement>, exporter: Exporter) => {
     await waitForRender();
     // if (document.querySelector(".outOfSync")) {
     //   throw new Error("Diagram is out of sync");
@@ -402,7 +386,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
     event.preventDefault();
   };
 
-  const onCopyClipboard = async (event: Event) => {
+  const onCopyClipboard = async (event: React.MouseEvent<HTMLButtonElement>) => {
     await exportImage(event, clipboardCopy);
   };
 
@@ -502,7 +486,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
                   {t("diagram.shareExpireTime")}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <Select value={shareTime} onValueChange={setShareTime}>
+                  <Select value={shareTime} onValueChange={(v) => setShareTime(v as ShareExpireTime)}>
                     <SelectTrigger>
                       <SelectValue
                         placeholder={t("diagram.selectPlaceholder")}
@@ -609,7 +593,7 @@ const LiveEditor = ({ children }: { children: React.ReactNode }) => {
 
                 <RadioGroup
                   value={imagemodeselected}
-                  onValueChange={setImagemodeselected}
+                  onValueChange={(v) => setImagemodeselected(v as "autosize" | "width" | "height")}
                   className="flex items-center gap-2 h-8"
                 >
                   <div className="flex items-center space-x-2">

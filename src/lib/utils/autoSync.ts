@@ -4,7 +4,7 @@
 
 // let shouldSync = true;
 // let updater: () => void;
-let renderPromise: Promise<void> | undefined;
+// let renderPromise: Promise<void> | undefined;
 // let resolveRenderPromise: (() => void) | undefined;
 // const renderDelay = 1000;
 // const slowRenderThreshold = 150;

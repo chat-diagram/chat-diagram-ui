@@ -26,7 +26,7 @@ const FloatingInspectPanel: React.FC<{ children: React.ReactNode }> = ({
     visible: {
       scale: 1,
       opacity: 1,
-      transition: { type: "spring", stiffness: 260, damping: 20 },
+      transition: { type: "spring" as const, stiffness: 260, damping: 20 },
     },
     exit: { scale: 0, opacity: 0 },
   };
@@ -64,10 +64,10 @@ const FloatingInspectPanel: React.FC<{ children: React.ReactNode }> = ({
             size={{ width: panelState.width, height: panelState.height }}
             position={{ x: panelState.x, y: panelState.y }}
             // 监听状态改变
-            onDragStop={(e, d) =>
+            onDragStop={(_e, d) =>
               setPanelState((prev) => ({ ...prev, x: d.x, y: d.y }))
             }
-            onResizeStop={(e, direction, ref, delta, position) => {
+            onResizeStop={(_e, _direction, ref, _delta, position) => {
               setPanelState({
                 width: parseInt(ref.style.width, 10),
                 height: parseInt(ref.style.height, 10),

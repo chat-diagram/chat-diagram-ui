@@ -1,6 +1,6 @@
 "use client";
 import { Bubble, useXAgent, useXChat } from "@ant-design/x";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 import { Card, message, type GetProp } from "antd";
 import { useChatContext } from "../layout";
@@ -8,8 +8,8 @@ import { CustomSender } from "@/components/sender";
 import { useSender } from "@/hooks/use-sender";
 import { useGetDiagram } from "@/hooks/use-diagrams";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { diagramsApi, DiagramVersion } from "@/lib/api/diagrams";
-import { MessageInfo, MessageStatus } from "@ant-design/x/es/useXChat";
+import { diagramsApi } from "@/lib/api/diagrams";
+import { MessageInfo, MessageStatus } from "@ant-design/x/es/use-x-chat";
 import { Avatar as AvatarUser } from "@/components/avatar";
 import { LocalIcons } from "@/components/local-icons";
 import { useAppStore } from "@/store/app";
@@ -58,7 +58,7 @@ const roles: (user: User) => GetProp<typeof Bubble.List, "roles"> = (
 const Independent: React.FC = () => {
   const t = useI18n();
 
-  const { title, setTitle } = useChatContext();
+  const { setTitle } = useChatContext();
   const { user } = useAppStore();
 
   const router = useRouter();
@@ -83,8 +83,8 @@ const Independent: React.FC = () => {
     request: async ({ message }, { onUpdate, onSuccess, onError }) => {
       await generateMermaidCode(
         message as string,
-        onUpdate,
-        onSuccess,
+        onUpdate as unknown as (mermaidCode: string) => void,
+        onSuccess as unknown as (mermaidCode: string) => void,
         onError
       );
     },
@@ -104,7 +104,6 @@ const Independent: React.FC = () => {
 
   const queryProjectId = searchParams.get("pid");
   const queryDescription = searchParams.get("d");
-  const queryProjectTitle = searchParams.get("title");
 
   // 处理刚创建的情况
   useEffect(() => {
@@ -127,16 +126,15 @@ const Independent: React.FC = () => {
         });
         setMessages(messages);
 
-        const response: any = await diagramsApi.createDiagram({
+        const response = await diagramsApi.createDiagram({
           projectId: queryProjectId as string,
           description: queryDescription as string,
-        });
+        }) as Response;
 
         const reader = response.body?.getReader();
         if (!reader) throw new Error("No reader available");
         let fullResponse = "";
         let title = "";
-        console.log("lei1");
 
         while (true) {
           const { done, value } = await reader.read();
@@ -178,21 +176,18 @@ const Independent: React.FC = () => {
                   });
                 }
                 if (jsonData.diagram) {
-                  console.log("jsonData.diagram", jsonData.diagram);
                   // queryClient.invalidateQueries({
                   //   queryKey: ["diagram-project", jsonData.diagram.projectId],
                   // });
                   router.replace(`/chat/${jsonData.diagram.id}`);
                 }
-              } catch (e) {
-                console.log("error", e);
+              } catch {
                 // 忽略非JSON格式的行
                 continue;
               }
             }
           }
         }
-        console.log("init res", fullResponse);
       }
     };
 
@@ -231,8 +226,6 @@ const Independent: React.FC = () => {
   }, [diagrams?.id]);
 
   // ==================== Nodes ====================
-  // const [isShowDiagram, setIsShowDiagramOrigin] =
-  useState<DiagramVersion | null>(null);
   const { setActiveDiagramVersion, activeDiagramVersion } = useChatContext();
 
   // const setIsShowDiagram = (version: DiagramVersion | null) => {
@@ -319,8 +312,7 @@ const Independent: React.FC = () => {
             </Card>
           </div>
         );
-      } catch (e) {
-        console.log("message render error", e);
+      } catch {
         return <div>{message}</div>;
       }
     }
@@ -348,12 +340,12 @@ const Independent: React.FC = () => {
     onError: (error: Error) => void
   ) => {
     try {
-      const response: any = await diagramsApi.createDiagramVersion(
+      const response = await diagramsApi.createDiagramVersion(
         id as string,
         {
           description,
         }
-      );
+      ) as Response;
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
       let fullResponse = "";
@@ -425,8 +417,7 @@ const Independent: React.FC = () => {
                   refetchType: "all",
                 });
               }
-            } catch (e) {
-              console.log("generateMermaidCode error", e);
+            } catch {
               // 忽略非JSON格式的行
               continue;
             }
@@ -442,7 +433,6 @@ const Independent: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error("生成 Mermaid 代码失败:", error);
       throw error;
     } finally {
       // setIsLoading(false);

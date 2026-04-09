@@ -105,6 +105,7 @@ export default function ProjectDetailPage() {
 
         <div className="px-4 space-y-2 py-4">
           <CustomSender
+            selected={null}
             content={content}
             onEnhance={() =>
               enhanceDescription(content, (content: string) => {

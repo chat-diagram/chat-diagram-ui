@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 
 export default function PaymentStatus() {
   const t = useI18n();
-  const paymentId = useParams().id;
+  const paymentId = useParams().id as string;
   const [newPayment, setNewPayment] = useState<Payment | null>(null);
   const [step, setStep] = useState<
     "redirect" | "confirm" | "success" | "failed"
@@ -66,11 +66,11 @@ export default function PaymentStatus() {
 
       // 5分钟后停止轮询
       setTimeout(() => {
-        clearInterval(timer);
+        clearInterval(timer ?? undefined);
       }, 5 * 60 * 1000);
 
       return () => {
-        clearInterval(timer);
+        clearInterval(timer ?? undefined);
       };
     };
     // startConfirm();

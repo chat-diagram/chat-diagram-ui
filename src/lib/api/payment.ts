@@ -32,6 +32,6 @@ export const paymentApi = {
   createPayment: (data: CreatePaymentRequest) =>
     request.post<Payment>(`${baseUrl}/payments`, data),
   getPaymentHistory: () =>
-    request.get<PaymentHistoryResponse[]>(`${baseUrl}/payments`),
-  getPaymentDetail: (id: string) => request.get(`${baseUrl}/payments/${id}`),
+    request.get<PaymentHistoryResponse>(`${baseUrl}/payments`),
+  getPaymentDetail: (id: string) => request.get<Payment>(`${baseUrl}/payments/${id}`),
 };

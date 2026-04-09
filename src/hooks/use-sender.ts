@@ -12,7 +12,7 @@ export const useSender = () => {
     try {
       setLoading(true);
       if (description.length === 0) return;
-      const response: any = await openaiApi.enhanceStream({ description });
+      const response = await openaiApi.enhanceStream({ description }) as Response;
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader available");
       let fullResponse = "";
@@ -24,7 +24,6 @@ export const useSender = () => {
         // 解析 SSE 格式数据
         const text = new TextDecoder().decode(value);
         const lines = text.split("\n");
-        console.log("enhang lines ", lines);
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             try {
@@ -33,10 +32,9 @@ export const useSender = () => {
                 fullResponse += jsonData.content;
                 // 实时更新UI
                 setContent(fullResponse);
-                onUpdate(fullResponse);
+                onUpdate?.(fullResponse);
               }
-            } catch (e) {
-              console.log("enhanceDescription error", e);
+            } catch {
               // 忽略非JSON格式的行
               continue;
             }
@@ -45,7 +43,6 @@ export const useSender = () => {
       }
       return fullResponse;
     } catch (error) {
-      console.error("增强描述失败:", error);
       throw error;
     } finally {
       setLoading(false);

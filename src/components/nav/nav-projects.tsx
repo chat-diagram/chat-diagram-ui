@@ -3,7 +3,6 @@
 import {
   ChartNoAxesGantt,
   Folder,
-  Forward,
   MoreHorizontal,
   Trash2,
 } from "lucide-react";

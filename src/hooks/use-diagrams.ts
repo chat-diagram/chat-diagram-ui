@@ -65,16 +65,11 @@ export function useRollbackDiagramVersion(diagramId: string) {
 
 export function useRenameDiagram() {
   return useMutation({
-    mutationFn: ({
-      diagramId,
-      data,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      projectId,
-    }: {
+    mutationFn: (variables: {
       diagramId: string;
       data: { title: string };
       projectId: string;
-    }) => diagramsApi.renameDiagram(diagramId, data),
+    }) => diagramsApi.renameDiagram(variables.diagramId, variables.data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["diagrams-project", variables.projectId],

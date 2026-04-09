@@ -2,7 +2,6 @@
 
 import { useTranslation } from "react-i18next";
 import { I18nextProvider } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import i18n from "@/i18n";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";

@@ -45,7 +45,7 @@ export const request = {
     const isStream = response.headers.get("content-type")?.includes("stream");
 
     if (isStream) {
-      return response; // 对于流式请求直接返回 response
+      return response as unknown as T; // 对于流式请求直接返回 response
     }
     const data: ApiResponse<T> = await response.json();
 

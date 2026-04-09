@@ -624,7 +624,7 @@ export const initEditor = (monacoEditor: typeof Monaco): void => {
       { token: "typeKeyword", foreground: "9650c8", fontStyle: "bold" },
       { token: "transition", foreground: "008800", fontStyle: "bold" },
       { token: "identifier", foreground: "9cdcfe" },
-      { background: "#000000" }, // 设置背景色与工具栏一致
+      // { background: "#000000" }, // 设置背景色与工具栏一致
     ],
     colors: {
       "editor.background": "#0a0a0b",

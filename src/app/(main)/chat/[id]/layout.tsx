@@ -109,7 +109,7 @@ interface ChatContextType {
   editorState: EditorState;
   setEditorState: (state: EditorState) => void;
   selected: Set<string>;
-  setSelected: (selected: Set<string> | (() => Set<string>)) => void;
+  setSelected: (selected: Set<string> | ((prev: Set<string>) => Set<string>)) => void;
   title: string;
   setTitle: (title: string) => void;
 }
@@ -120,13 +120,14 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
   const [mermaidCode, setMermaidCodeOrigin] = useState("");
   const [enhancedDescription, setEnhancedDescription] = useState("");
   const [editorMounted, setEditorMounted] = useState(false);
-  const [activeDiagramVersion, setActiveDiagramVersion] = useState(null);
+  const [activeDiagramVersion, setActiveDiagramVersion] = useState<DiagramVersion | null>(null);
   const [diagram, setDiagram] = useState<Diagram | null>(null);
   const [isSharePage, setIsSharePage] = useState(false);
   const [editorState, setEditorState] = useState<EditorState>({
     rough: false,
   });
-  const [selected, setSelected] = useState(new Set());
+  const [selected, setSelected] = useState(new Set<string>());
+  const [title, setTitle] = useState("");
   const setMermaidCode = (code: string) => {
     function filterMermaidComments(mermaidCode: string) {
       /**
@@ -176,6 +177,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
         setEditorState,
         selected,
         setSelected,
+        title,
+        setTitle,
       }}
     >
       {children}
@@ -211,10 +214,7 @@ const Layout = ({
     setIsSharePage,
     isSharePage,
     setActiveDiagramVersion,
-    activeDiagramVersion,
   } = useChatContext();
-
-  const [sharedDiagram, setSharedDiagram] = useState<Diagram | null>(null);
 
   useEffect(() => {
     const getShareDiagram = async () => {
@@ -222,7 +222,6 @@ const Layout = ({
       if (!isSharePage) return;
       const res: unknown = await diagramsApi.getShareDiagram(id as string);
       setActiveDiagramVersion(res as DiagramVersion);
-      setSharedDiagram(res as DiagramVersion);
     };
     getShareDiagram();
   }, [isSharePage]);
