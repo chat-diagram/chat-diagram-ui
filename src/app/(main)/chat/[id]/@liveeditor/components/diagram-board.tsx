@@ -28,10 +28,7 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
       const delta = e.deltaY > 0 ? 0.98 : 1.02;
       setTransform((prev) => {
         if (!containerRef.current) return prev;
-        const newScale = Math.min(
-          MAX_SCALE,
-          Math.max(MIN_SCALE, prev.scale * delta)
-        );
+        const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * delta));
         const rect = containerRef.current.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
@@ -61,7 +58,6 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
 
   // 中键拖拽平移
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    console.log("handleMouseDown", e);
     // 中键或空格+左键 → 平移
     if (e.button === 1) {
       e.preventDefault();
@@ -153,7 +149,11 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
     setSelected((prev) => {
       const next = new Set(prev);
       if (e.shiftKey) {
-        if (next.has(id)) { next.delete(id); } else { next.add(id); }
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
       } else {
         return new Set([id]);
       }
@@ -204,8 +204,7 @@ function DiagramBoard({ svgContent }: { svgContent: string }) {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage:
-            "radial-gradient(circle, #d1d5db 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, #d1d5db 1px, transparent 1px)",
           backgroundSize: "20px 20px",
           //   backgroundImage: `radial-gradient(circle, #d1d5db ${
           //     1 * transform.scale

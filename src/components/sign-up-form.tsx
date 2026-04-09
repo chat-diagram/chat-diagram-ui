@@ -7,10 +7,7 @@ import { useState } from "react";
 import { SignupCredentials } from "@/types/auth";
 import { useSignup } from "@/hooks/use-auth";
 
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"form">) {
+export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"form">) {
   const [credentials, setCredentials] = useState<SignupCredentials>({
     username: "",
     password: "",
@@ -27,8 +24,8 @@ export function SignupForm({
     }
     try {
       await signup.mutateAsync(credentials);
-    } catch (error) {
-      console.error("注册失败:", error);
+    } catch {
+      // 错误已在 mutation 中处理
     }
   };
   const [emailError, setEmailError] = useState<string>("");
@@ -45,11 +42,7 @@ export function SignupForm({
   };
 
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      {...props}
-      onSubmit={handleSubmit}
-    >
+    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Signup to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
@@ -83,9 +76,7 @@ export function SignupForm({
             }}
             onBlur={() => validateEmail(credentials.email)}
           />
-          {emailError && (
-            <span className="text-sm text-red-500">{emailError}</span>
-          )}
+          {emailError && <span className="text-sm text-red-500">{emailError}</span>}
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -96,9 +87,7 @@ export function SignupForm({
             type="password"
             required
             value={credentials.password}
-            onChange={(e) =>
-              setCredentials({ ...credentials, password: e.target.value })
-            }
+            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSubmit(e);

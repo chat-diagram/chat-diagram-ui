@@ -25,9 +25,8 @@ export function useDeleteProject() {
 export function useCreateProject() {
   return useMutation({
     mutationFn: projectsApi.createProject,
-    onSuccess: (data) => {
+    onSuccess: () => {
       // message.success("Project created successfully!");
-      console.log(data);
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });

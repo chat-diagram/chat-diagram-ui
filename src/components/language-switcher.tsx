@@ -11,11 +11,6 @@ export function LanguageSwitcher() {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    console.log(
-      i18n.getResource("en", "common", "welcome"),
-      t,
-      t("common.welcome")
-    );
     // 可选：保存到 localStorage
     localStorage.setItem("preferred-language", lng);
   };

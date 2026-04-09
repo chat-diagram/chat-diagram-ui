@@ -11,10 +11,10 @@
     "prepare": "husky",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
-    "test": "jest",
+    "test": "echo 'Run pnpm add -D jest first' && exit 1",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "echo 'Run pnpm add -D @playwright/test first' && exit 1"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.2",

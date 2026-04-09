@@ -7,10 +7,7 @@ import { useState } from "react";
 import { LoginCredentials } from "@/types/auth";
 import { useLogin } from "@/hooks/use-auth";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"form">) {
+export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"form">) {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     username: "",
     password: "",
@@ -22,17 +19,12 @@ export function LoginForm({
     e.preventDefault();
     try {
       await login.mutateAsync(credentials);
-    } catch (error) {
+    } catch {
       // 错误已在 mutation 中处理
-      console.error("登录失败:", error);
     }
   };
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      {...props}
-      onSubmit={handleSubmit}
-    >
+    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
@@ -48,18 +40,13 @@ export function LoginForm({
             placeholder="username"
             required
             value={credentials.username}
-            onChange={(e) =>
-              setCredentials({ ...credentials, username: e.target.value })
-            }
+            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
           />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
             <Label htmlFor="password">Password</Label>
-            <a
-              href="/signup"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
+            <a href="/signup" className="ml-auto text-sm underline-offset-4 hover:underline">
               Forgot your password?
             </a>
           </div>
@@ -68,9 +55,7 @@ export function LoginForm({
             type="password"
             required
             value={credentials.password}
-            onChange={(e) =>
-              setCredentials({ ...credentials, password: e.target.value })
-            }
+            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSubmit(e);

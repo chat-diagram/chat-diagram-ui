@@ -13,10 +13,7 @@ export const simulateDownload = (download: string, href: string): void => {
   a.remove();
 };
 
-export function downloadSvgAsPng(
-  svgElement: HTMLElement,
-  filename = "image.png"
-) {
+export function downloadSvgAsPng(svgElement: HTMLElement, filename = "image.png") {
   try {
     // 获取 SVG 的尺寸
     const svgRect = svgElement.getBoundingClientRect();
@@ -55,19 +52,16 @@ export function downloadSvgAsPng(
         link.href = pngUrl;
         link.click();
         URL.revokeObjectURL(url); // 清理 URL
-      } catch (error) {
-        console.error("PNG导出失败:", error);
+      } catch {
         // message.error(t("diagram.exportError"));
       }
     };
 
-    img.onerror = (error) => {
-      console.error("SVG加载失败:", error);
+    img.onerror = () => {
       // message.error(t("diagram.svgLoadError"));
       URL.revokeObjectURL(url);
     };
-  } catch (error) {
-    console.error("下载过程出错:", error);
+  } catch {
     // message.error(t("diagram.downloadError"));
   }
 }
